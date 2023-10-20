@@ -8,6 +8,7 @@ return [
     'captcha' => ['key' => $projectFlag . '=>admin:captcha:%s', 'ttl' => 1800],
     'control_auth' => ['key' => $projectFlag . '=>admin:control:auth', 'ttl' => 3600],
 
+    'mem_captcha' => ['key' => $projectFlag . '=>mem:captcha:%s', 'ttl' => 1800],
     'mem_info' => ['key' => $projectFlag . '=>mem:info:%s', 'ttl' => 86400], /// 用户信息
     'web_verify_code_mail' => ['key' => $projectFlag . '=>mem:verify_code_mail:%s', 'ttl' => 300], /// 邮箱验证码
 

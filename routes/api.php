@@ -69,6 +69,10 @@ $dingoApi->version("v1", [
 ], function ($dingoApi) {
     // 用户登录
     $dingoApi->post("api/user/login", \App\Http\Controllers\Api\MemberController::class."@login")->name("api.user.login");
+
+    // 验证码
+    $dingoApi->Get("api/captchas/{id}", \App\Http\Controllers\Api\CaptchaController::class."@index")->name("api.captchas.index");
+    $dingoApi->Post("api/captchas/check", \App\Http\Controllers\Api\CaptchaController::class."@check")->name("api.captchas.check");
 });
 
 

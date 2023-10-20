@@ -18,6 +18,7 @@ class MemberController extends Controller
     {
         $params = $request->all();
 
-        return $this->jsonAdminResult($params);
+        return $this->jsonAdminResult([],10001,'操作失败');
+        return $this->jsonAdminResult();
     }
 }
