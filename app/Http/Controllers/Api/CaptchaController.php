@@ -24,7 +24,9 @@ class CaptchaController extends Controller
         $config = config('redisKey');
         $captcheKey = sprintf($config['mem_captcha']['key'], $key);
 
-        $captchaBuilder->setPhrase(rand(1000, 9999));
+        $captchaBuilder->setPhrase(rand(1000, 9999)); // 设置验证码内容
+        $captchaBuilder->setIgnoreAllEffects(true); // 设置忽略干扰
+        $captchaBuilder->setBackgroundColor(255, 255, 255); // 设置背景色
         $captchaBuilder->build();
         $phrase = $captchaBuilder->getPhrase();
         $redis::set($captcheKey, $phrase);
