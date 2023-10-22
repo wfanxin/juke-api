@@ -67,12 +67,33 @@ $dingoApi->version("v1", [
 $dingoApi->version("v1", [
     "middleware" => ["CrossHttp"]
 ], function ($dingoApi) {
+    // 用户注册
+    $dingoApi->post("api/user/register", \App\Http\Controllers\Api\MemberController::class."@register")->name("api.user.register");
+
     // 用户登录
     $dingoApi->post("api/user/login", \App\Http\Controllers\Api\MemberController::class."@login")->name("api.user.login");
+
+    // 忘记密码
+    $dingoApi->post("api/user/forget", \App\Http\Controllers\Api\MemberController::class."@forget")->name("api.user.forget");
 
     // 验证码
     $dingoApi->Get("api/captchas/{id}", \App\Http\Controllers\Api\CaptchaController::class."@index")->name("api.captchas.index");
     $dingoApi->Post("api/captchas/check", \App\Http\Controllers\Api\CaptchaController::class."@check")->name("api.captchas.check");
+});
+
+$dingoApi->version("v1", [
+    "middleware" => ["ApiToken", "CrossHttp"]
+], function ($dingoApi) {
+    // 上传文件
+    $dingoApi->post("api/service/uploadFile", \App\Http\Controllers\Api\ServiceController::class."@uploadFile")->name("api.service.uploadFile");
+
+    // 退出登录
+    $dingoApi->post("api/user/logout", \App\Http\Controllers\Api\MemberController::class."@logout")->name("api.user.logout");
+    // 获取用户信息
+    $dingoApi->get("api/user/getMember", \App\Http\Controllers\Api\MemberController::class."@getMember")->name("api.user.getMember");
+    // 编辑用户信息
+    $dingoApi->post("api/user/editMember", \App\Http\Controllers\Api\MemberController::class."@editMember")->name("api.user.editMember");
+
 });
 
 

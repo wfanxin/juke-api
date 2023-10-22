@@ -8,10 +8,10 @@ return [
     'captcha' => ['key' => $projectFlag . '=>admin:captcha:%s', 'ttl' => 1800],
     'control_auth' => ['key' => $projectFlag . '=>admin:control:auth', 'ttl' => 3600],
 
-    'mem_captcha' => ['key' => $projectFlag . '=>mem:captcha:%s', 'ttl' => 1800],
-    'mem_info' => ['key' => $projectFlag . '=>mem:info:%s', 'ttl' => 86400], /// 用户信息
-    'web_verify_code_mail' => ['key' => $projectFlag . '=>mem:verify_code_mail:%s', 'ttl' => 300], /// 邮箱验证码
+    'mem_info' => ['key' => $projectFlag . '=>api:member_info:%s'], /// 用户信息
+    'm_token' => ['key' => $projectFlag.'=>api:system:token:%s', 'ttl' => 86400], // 登录授权令牌信息
+    'mem_captcha' => ['key' => $projectFlag . '=>api:captcha:%s', 'ttl' => 1800],
 
-    'm_token' => ['key' => $projectFlag.'=>mem:system:token:%s:%s'], /// 登录授权令牌信息
-    'mem_appSecret_status' => ['key' => $projectFlag . '=>mem:mem_appSecret_status:%s'], /// 用户状态以及密钥信息
+    'web_verify_code_mail' => ['key' => $projectFlag . '=>api:verify_code_mail:%s', 'ttl' => 300], /// 邮箱验证码
+    'mem_appSecret_status' => ['key' => $projectFlag . '=>api:mem_appSecret_status:%s'], /// 用户状态以及密钥信息
 ];

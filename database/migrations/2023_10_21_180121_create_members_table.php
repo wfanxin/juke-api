@@ -13,14 +13,16 @@ class CreateMembersTable extends Migration
      */
     public function up()
     {
-        Schema::create('members;', function (Blueprint $table) {
+        Schema::create('members', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->bigInteger('pid')->default(0)->comment('上级id');
+            $table->bigInteger('invite_uid')->default(0)->comment('邀请uid');
+            $table->bigInteger('p_uid')->default(0)->comment('上级uid');
             $table->string('mobile', 20)->default('')->comment('手机号');
             $table->string('name', 255)->default('')->comment('姓名');
             $table->string('password', 255)->default('')->comment('密码');
             $table->string('salt', 255)->default('')->comment('密码盐值');
             $table->string('avatar', 500)->default('')->comment('头像');
+            $table->tinyInteger('level')->default(0)->comment('等级');
             $table->tinyInteger('status')->default(0)->comment('状态：1：正常；2：锁定');
             $table->timestamps();
         });
@@ -33,6 +35,6 @@ class CreateMembersTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('members;');
+        Schema::dropIfExists('members');
     }
 }
