@@ -94,6 +94,10 @@ $dingoApi->version("v1", [
     // 编辑用户信息
     $dingoApi->post("api/user/editMember", \App\Http\Controllers\Api\MemberController::class."@editMember")->name("api.user.editMember");
 
+    // 收款方式
+    $dingoApi->post("api/user/payment", \App\Http\Controllers\Api\MemberController::class."@payment")->name("api.user.payment");
+    // 获取收款方式
+    $dingoApi->get("api/user/getPayment", \App\Http\Controllers\Api\MemberController::class."@getPayment")->name("api.user.getPayment");
 });
 
 

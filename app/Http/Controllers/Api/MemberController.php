@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Common\Upload;
 use App\Http\Traits\FormatTrait;
 use App\Model\Api\Member;
+use App\Model\Api\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redis;
 
@@ -221,7 +222,9 @@ class MemberController extends Controller
             $level_list = array_column($level_list, 'label', 'value');
             $info['level_name'] = $level_list[$info['level']] ?? '';
             $urlPre = config('filesystems.disks.tmp.url');
-            $info['avatar'] = $urlPre . $info['avatar'];
+            if (!empty($info['avatar'])) {
+                $info['avatar'] = $urlPre . $info['avatar'];
+            }
         }
 
         return $this->jsonAdminResult(['data' => $info]);
@@ -291,4 +294,117 @@ class MemberController extends Controller
         }
     }
 
+    /**
+     * 收款方式
+     * @param Request $request
+     */
+    public function payment(Request $request, Member $mMember, Payment $mPayment)
+    {
+        $params = $request->all();
+
+        $pay_method = $params['pay_method'] ?? 0;
+
+        if (empty($pay_method)) {
+            return $this->jsonAdminResult([],10001,'请选择收款渠道');
+        }
+
+        if (!in_array($pay_method, [1,2,3])) {
+            return $this->jsonAdminResult([],10001,'参数错误');
+        }
+
+        $count = $mPayment->where('uid', $request->memId)->where('pay_method', $pay_method)->count();
+        $content = [];
+        if ($pay_method == 1) { // 银行卡
+            $bank_name = $params['bank_name'] ?? '';
+            $branch_name = $params['branch_name'] ?? '';
+            $account = $params['account'] ?? '';
+            $account_name = $params['account_name'] ?? '';
+            $contact = $params['contact'] ?? '';
+
+            if (empty($bank_name)) {
+                return $this->jsonAdminResult([],10001,'请输入银行名称');
+            }
+
+            if (empty($branch_name)) {
+                return $this->jsonAdminResult([],10001,'请输入支行名称');
+            }
+
+            if (empty($account)) {
+                return $this->jsonAdminResult([],10001,'请输入银行账号');
+            }
+
+            if (empty($account_name)) {
+                return $this->jsonAdminResult([],10001,'请输入账号姓名');
+            }
+
+            if (empty($contact)) {
+                return $this->jsonAdminResult([],10001,'请输入联系方式');
+            }
+
+            $content['bank_name'] = $bank_name;
+            $content['branch_name'] = $branch_name;
+            $content['account'] = $account;
+            $content['account_name'] = $account_name;
+            $content['contact'] = $contact;
+        } else {
+            $pay_url = $params['pay_url'] ?? '';
+            if (empty($pay_url)) {
+                return $this->jsonAdminResult([],10001,'请上传收款码');
+            }
+
+            $urlPre = config('filesystems.disks.tmp.url');
+            $pay_url = str_replace($urlPre, '', $pay_url);
+
+            $content['pay_url'] = $pay_url;
+        }
+
+        $res = true;
+        $time = date('Y-m-d H:i:s');
+        if ($count > 0) { // 更新
+            $res = $mPayment->where('uid', $request->memId)->where('pay_method', $pay_method)->update([
+                'content' => json_encode($content)
+            ]);
+        } else { // 新增
+            $res = $mPayment->insert([
+                'uid' => $request->memId,
+                'pay_method' => $pay_method,
+                'content' => json_encode($content),
+                'created_at' => $time,
+                'updated_at' => $time
+            ]);
+        }
+
+        if ($res) {
+            return $this->jsonAdminResult();
+        } else {
+            return $this->jsonAdminResult([],10001,'操作失败');
+        }
+    }
+
+    /**
+     * 获取收款方式
+     * @param Request $request
+     */
+    public function getPayment(Request $request, Member $mMember, Payment $mPayment)
+    {
+        $params = $request->all();
+
+        $list = $mPayment->where('uid', $request->memId)->orderBy('updated_at', 'asc')->get(['pay_method', 'content']);
+        $list = $this->dbResult($list);
+
+        $data = [];
+        $pay_method = 0;
+        $urlPre = config('filesystems.disks.tmp.url');
+        foreach ($list as $key => $value) {
+            $content = json_decode($value['content'], true) ?? [];
+            if (!empty($content['pay_url'])) {
+                $content['pay_url'] = $urlPre . $content['pay_url'];
+            }
+
+            $data[$value['pay_method']] = $content;
+            $pay_method = $value['pay_method'];
+        }
+
+        return $this->jsonAdminResult(['pay_method' => $pay_method, 'list' => $data]);
+    }
 }
