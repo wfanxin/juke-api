@@ -19,17 +19,18 @@ $dingoApi = app(\Dingo\Api\Routing\Router::class);
 $dingoApi->version("v1", [
     "middleware" => ["AdminToken", "CrossHttp"]
 ], function ($dingoApi) {
-    // 标签管理
-    $dingoApi->get("match/tag/list", \App\Http\Controllers\Admin\Match\TagController::class."@list")->name("match.tag.list");
-    $dingoApi->post("match/tag/add", \App\Http\Controllers\Admin\Match\TagController::class."@add")->name("match.tag.add");
-    $dingoApi->post("match/tag/edit", \App\Http\Controllers\Admin\Match\TagController::class."@edit")->name("match.tag.edit");
-    $dingoApi->post("match/tag/del", \App\Http\Controllers\Admin\Match\TagController::class."@del")->name("match.tag.del");
+    // 幻灯片管理
+    $dingoApi->get("mobile/slide/list", \App\Http\Controllers\Admin\Mobile\SlideController::class."@list")->name("mobile.slide.list");
+    $dingoApi->post("mobile/slide/add", \App\Http\Controllers\Admin\Mobile\SlideController::class."@add")->name("mobile.slide.add");
+    $dingoApi->post("mobile/slide/edit", \App\Http\Controllers\Admin\Mobile\SlideController::class."@edit")->name("mobile.slide.edit");
+    $dingoApi->post("mobile/slide/del", \App\Http\Controllers\Admin\Mobile\SlideController::class."@del")->name("mobile.slide.del");
 
-    // 比赛管理
-    $dingoApi->get("match/match/list", \App\Http\Controllers\Admin\Match\MatchController::class."@list")->name("match.match.list");
-    $dingoApi->post("match/match/add", \App\Http\Controllers\Admin\Match\MatchController::class."@add")->name("match.match.add");
-    $dingoApi->post("match/match/edit", \App\Http\Controllers\Admin\Match\MatchController::class."@edit")->name("match.match.edit");
-    $dingoApi->post("match/match/del", \App\Http\Controllers\Admin\Match\MatchController::class."@del")->name("match.match.del");
+
+    // 标签管理
+    $dingoApi->get("mobile/article/list", \App\Http\Controllers\Admin\Mobile\ArticleController::class."@list")->name("mobile.article.list");
+    $dingoApi->post("mobile/article/add", \App\Http\Controllers\Admin\Mobile\ArticleController::class."@add")->name("mobile.article.add");
+    $dingoApi->post("mobile/article/edit", \App\Http\Controllers\Admin\Mobile\ArticleController::class."@edit")->name("mobile.article.edit");
+    $dingoApi->post("mobile/article/del", \App\Http\Controllers\Admin\Mobile\ArticleController::class."@del")->name("mobile.article.del");
 
     // 用户
     $dingoApi->post("users/checkName", \App\Http\Controllers\Admin\System\UserController::class."@checkName")->name("users.checkName");

@@ -6,8 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 use App\Http\Traits\FormatTrait;
 use Illuminate\Support\Facades\DB;
 
-class Tag extends Model
+class Slide extends Model
 {
     use FormatTrait;
-    public $table = 'tags';
+    public $table = 'slides';
 }

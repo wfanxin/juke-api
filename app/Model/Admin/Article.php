@@ -6,8 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 use App\Http\Traits\FormatTrait;
 use Illuminate\Support\Facades\DB;
 
-class Match extends Model
+class Article extends Model
 {
     use FormatTrait;
-    public $table = 'matchs';
+    public $table = 'articles';
 }
