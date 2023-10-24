@@ -8,7 +8,7 @@ use App\Model\Admin\Article;
 use Illuminate\Http\Request;
 
 /**
- * @name 文章管理
+ * @name 平台说明管理
  * Class ArticleController
  * @package App\Http\Controllers\Admin\Mobile
  *
@@ -19,7 +19,7 @@ class ArticleController extends Controller
     use FormatTrait;
 
     /**
-     * @name 文章列表
+     * @name 平台说明列表
      * @Get("/lv/mobile/article/list")
      * @Version("v1")
      * @param Request $request
@@ -45,6 +45,13 @@ class ArticleController extends Controller
             ->orderBy($orderField, $sort)
             ->paginate($pageSize, ['*'], 'page', $page);
 
+        if (!empty($data->items())) {
+            $urlPre = config('filesystems.disks.tmp.url');
+            foreach ($data->items() as $k => $v){
+                $data->items()[$k]['image'] = $urlPre . $v->image;
+            }
+        }
+
         return $this->jsonAdminResult([
             'total' => $data->total(),
             'data' => $data->items()
@@ -52,7 +59,7 @@ class ArticleController extends Controller
     }
 
     /**
-     * @name 添加文章
+     * @name 添加平台说明
      * @Post("/lv/mobile/article/add")
      * @Version("v1")
      * @param Request $request
@@ -64,19 +71,28 @@ class ArticleController extends Controller
         $params['userId'] = $request->userId;
 
         $title = $params['title'] ?? '';
+        $image = $params['image'] ?? '';
         $content = $params['content'] ?? '';
 
         if (empty($title)) {
             return $this->jsonAdminResult([],10001, '标题不能为空');
         }
 
+        if (empty($image)) {
+            return $this->jsonAdminResult([],10001, '图片不能为空');
+        }
+
         if (empty($content)) {
             return $this->jsonAdminResult([],10001, '内容不能为空');
         }
 
+        $urlPre = config('filesystems.disks.tmp.url');
+        $image = str_replace($urlPre, '', $image);
+
         $time = date('Y-m-d H:i:s');
         $res = $mArticle->insert([
             'title' => $title,
+            'image' => $image,
             'content' => $content,
             'created_at' => $time,
             'updated_at' => $time
@@ -90,7 +106,7 @@ class ArticleController extends Controller
     }
 
     /**
-     * @name 修改文章
+     * @name 修改平台说明
      * @Post("/lv/mobile/article/edit")
      * @Version("v1")
      * @param Request $request
@@ -102,6 +118,7 @@ class ArticleController extends Controller
 
         $id = $params['id'] ?? 0;
         $title = $params['title'] ?? '';
+        $image = $params['image'] ?? '';
         $content = $params['content'] ?? '';
 
         if (empty($id)) {
@@ -116,10 +133,14 @@ class ArticleController extends Controller
             return $this->jsonAdminResult([],10001, '内容不能为空');
         }
 
+        $urlPre = config('filesystems.disks.tmp.url');
+        $image = str_replace($urlPre, '', $image);
+
         $time = date('Y-m-d H:i:s');
         $res = $mArticle->where('id', $id)->update([
             'id' => $id,
             'title' => $title,
+            'image' => $image,
             'content' => $content,
             'updated_at' => $time
         ]);
@@ -132,7 +153,7 @@ class ArticleController extends Controller
     }
 
     /**
-     * @name 删除文章
+     * @name 删除平台说明
      * @Post("/lv/mobile/article/del")
      * @Version("v1")
      * @param Request $request

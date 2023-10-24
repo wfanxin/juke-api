@@ -8,7 +8,7 @@ use App\Model\Admin\Slide;
 use Illuminate\Http\Request;
 
 /**
- * @name 幻灯片管理
+ * @name 轮播图管理
  * Class SlideController
  * @package App\Http\Controllers\Admin\Mobile
  *
@@ -19,7 +19,7 @@ class SlideController extends Controller
     use FormatTrait;
 
     /**
-     * @name 幻灯片列表
+     * @name 轮播图列表
      * @Get("/lv/mobile/slide/list")
      * @Version("v1")
      * @param Request $request
@@ -45,6 +45,13 @@ class SlideController extends Controller
             ->orderBy($orderField, $sort)
             ->paginate($pageSize, ['*'], 'page', $page);
 
+        if (!empty($data->items())) {
+            $urlPre = config('filesystems.disks.tmp.url');
+            foreach ($data->items() as $k => $v){
+                $data->items()[$k]['image'] = $urlPre . $v->image;
+            }
+        }
+
         return $this->jsonAdminResult([
             'total' => $data->total(),
             'data' => $data->items()
@@ -52,7 +59,7 @@ class SlideController extends Controller
     }
 
     /**
-     * @name 添加幻灯片
+     * @name 添加轮播图
      * @Post("/lv/mobile/slide/add")
      * @Version("v1")
      * @param Request $request
@@ -74,6 +81,9 @@ class SlideController extends Controller
             return $this->jsonAdminResult([],10001, '图片不能为空');
         }
 
+        $urlPre = config('filesystems.disks.tmp.url');
+        $image = str_replace($urlPre, '', $image);
+
         $time = date('Y-m-d H:i:s');
         $res = $mSlide->insert([
             'title' => $title,
@@ -90,7 +100,7 @@ class SlideController extends Controller
     }
 
     /**
-     * @name 修改幻灯片
+     * @name 修改轮播图
      * @Post("/lv/mobile/slide/edit")
      * @Version("v1")
      * @param Request $request
@@ -116,6 +126,9 @@ class SlideController extends Controller
             return $this->jsonAdminResult([],10001, '图片不能为空');
         }
 
+        $urlPre = config('filesystems.disks.tmp.url');
+        $image = str_replace($urlPre, '', $image);
+
         $time = date('Y-m-d H:i:s');
         $res = $mSlide->where('id', $id)->update([
             'id' => $id,
@@ -132,7 +145,7 @@ class SlideController extends Controller
     }
 
     /**
-     * @name 删除幻灯片
+     * @name 删除轮播图
      * @Post("/lv/mobile/slide/del")
      * @Version("v1")
      * @param Request $request

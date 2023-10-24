@@ -1,29 +1,36 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Admin;
 
 use App\Common\Upload;
 use App\Http\Traits\FormatTrait;
 use Illuminate\Http\Request;
 
 /**
- * 服务
+ * @name 服务
+ * Class ServiceController
+ * @package App\Http\Controllers\Admin
+ *
+ * @PermissionWhiteList
  */
 class ServiceController extends Controller
 {
     use FormatTrait;
 
     /**
-     * 上传文件
+     * @name 上传文件
+     * @Get("/lv/service/uploadFile")
+     * @Version("v1")
      * @param Request $request
-     */
+     * @return \Illuminate\Http\JsonResponse
+     **/
     public function uploadFile(Request $request)
     {
         $file = $request->file('file');
         $tmpFile = '';
         if (!empty($file)) {
             $upload = new Upload();
-            $tmpFile = $upload->uploadToTmp($file, 'api/' . $request->memId . '/');
+            $tmpFile = $upload->uploadToTmp($file, 'admin/' . $request->userId . '/');
         }
 
         if ($tmpFile) {

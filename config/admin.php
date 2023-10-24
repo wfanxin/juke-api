@@ -6,9 +6,9 @@
 return [
     // sort唯一
     'nav' => [
-        'Match' => [
+        'Mobile' => [
             'sort' => 2,
-            'alias' => '比赛管理'
+            'alias' => '网站管理'
         ],
         'System' => [
             'sort' => 3,
@@ -17,8 +17,12 @@ return [
     ],
     // 栏目
     'nav_show_list' => [
-        '@Get:lv_match_tag_list',
-        '@Get:lv_match_match_list'
+        '@Get:lv_mobile_slide_list',
+        '@Get:lv_mobile_article_list',
+        '@Get:lv_permissions',
+        '@Get:lv_roles',
+        '@Get:lv_users',
+//        '@Get:lv_logs'
     ],
     'aliyun_oss' => [
         'AccessKeyId' => '',

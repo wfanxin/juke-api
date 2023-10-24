@@ -19,14 +19,16 @@ $dingoApi = app(\Dingo\Api\Routing\Router::class);
 $dingoApi->version("v1", [
     "middleware" => ["AdminToken", "CrossHttp"]
 ], function ($dingoApi) {
-    // 幻灯片管理
+    // 上传文件
+    $dingoApi->post("service/uploadFile", \App\Http\Controllers\Admin\ServiceController::class."@uploadFile")->name("service.uploadFile");
+
+    // 轮播图管理
     $dingoApi->get("mobile/slide/list", \App\Http\Controllers\Admin\Mobile\SlideController::class."@list")->name("mobile.slide.list");
     $dingoApi->post("mobile/slide/add", \App\Http\Controllers\Admin\Mobile\SlideController::class."@add")->name("mobile.slide.add");
     $dingoApi->post("mobile/slide/edit", \App\Http\Controllers\Admin\Mobile\SlideController::class."@edit")->name("mobile.slide.edit");
     $dingoApi->post("mobile/slide/del", \App\Http\Controllers\Admin\Mobile\SlideController::class."@del")->name("mobile.slide.del");
 
-
-    // 标签管理
+    // 平台说明管理
     $dingoApi->get("mobile/article/list", \App\Http\Controllers\Admin\Mobile\ArticleController::class."@list")->name("mobile.article.list");
     $dingoApi->post("mobile/article/add", \App\Http\Controllers\Admin\Mobile\ArticleController::class."@add")->name("mobile.article.add");
     $dingoApi->post("mobile/article/edit", \App\Http\Controllers\Admin\Mobile\ArticleController::class."@edit")->name("mobile.article.edit");
@@ -87,6 +89,9 @@ $dingoApi->version("v1", [
 ], function ($dingoApi) {
     // 上传文件
     $dingoApi->post("api/service/uploadFile", \App\Http\Controllers\Api\ServiceController::class."@uploadFile")->name("api.service.uploadFile");
+
+    // 首页
+    $dingoApi->get("api/index/list", \App\Http\Controllers\Api\IndexController::class."@list")->name("api.index.list");
 
     // 退出登录
     $dingoApi->post("api/user/logout", \App\Http\Controllers\Api\MemberController::class."@logout")->name("api.user.logout");
