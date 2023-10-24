@@ -34,6 +34,9 @@ $dingoApi->version("v1", [
     $dingoApi->post("mobile/article/edit", \App\Http\Controllers\Admin\Mobile\ArticleController::class."@edit")->name("mobile.article.edit");
     $dingoApi->post("mobile/article/del", \App\Http\Controllers\Admin\Mobile\ArticleController::class."@del")->name("mobile.article.del");
 
+    // 会员管理
+    $dingoApi->get("mobile/member/list", \App\Http\Controllers\Admin\Mobile\MemberController::class."@list")->name("mobile.member.list");
+
     // 用户
     $dingoApi->post("users/checkName", \App\Http\Controllers\Admin\System\UserController::class."@checkName")->name("users.checkName");
     $dingoApi->put("users/pwd", \App\Http\Controllers\Admin\System\UserController::class."@changePwd")->name("users.changePwd");
@@ -104,6 +107,9 @@ $dingoApi->version("v1", [
     $dingoApi->post("api/user/payment", \App\Http\Controllers\Api\MemberController::class."@payment")->name("api.user.payment");
     // 获取收款方式
     $dingoApi->get("api/user/getPayment", \App\Http\Controllers\Api\MemberController::class."@getPayment")->name("api.user.getPayment");
+
+    // 推荐人信息
+    $dingoApi->get("api/user/getInvite", \App\Http\Controllers\Api\MemberController::class."@getInvite")->name("api.user.getInvite");
 });
 
 

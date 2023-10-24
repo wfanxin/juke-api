@@ -208,7 +208,7 @@ class MemberController extends Controller
     }
 
     /**
-     * 用户登录
+     * 用户信息
      * @param Request $request
      */
     public function getMember(Request $request, Member $mMember) {
@@ -242,11 +242,12 @@ class MemberController extends Controller
         $res = true;
         if ($method == 'avatar') {
             $avatar = $params['avatar'] ?? '';
+            $urlPre = config('filesystems.disks.tmp.url');
+            $avatar = str_replace($urlPre, '', $avatar);
+            $avatar = str_replace('/static/logo.png', '', $avatar);
             if (empty($avatar)) {
                 return $this->jsonAdminResult([],10001,'头像不能为空');
             }
-            $urlPre = config('filesystems.disks.tmp.url');
-            $avatar = str_replace($urlPre, '', $avatar);
 
             $res = $mMember->where('id', $request->memId)->update(['avatar' => $avatar]);
         } else if ($method == 'name') {
@@ -406,5 +407,37 @@ class MemberController extends Controller
         }
 
         return $this->jsonAdminResult(['pay_method' => $pay_method, 'list' => $data]);
+    }
+
+    /**
+     * 推荐人信息
+     * @param Request $request
+     */
+    public function getInvite(Request $request, Member $mMember) {
+        $params = $request->all();
+
+        $userInfo = $mMember->where('id', $request->memId)->first(['id', 'invite_uid']);
+        $userInfo = $this->dbResult($userInfo);
+
+        $info = $mMember->where('id', $userInfo['invite_uid'])->first(['id', 'mobile', 'name', 'avatar', 'level']);
+        $info = $this->dbResult($info);
+
+        if (!empty($info)) {
+            $level_list = config('global.level_list');
+            $level_list = array_column($level_list, 'label', 'value');
+            $info['level_name'] = $level_list[$info['level']] ?? '';
+            $urlPre = config('filesystems.disks.tmp.url');
+            if (!empty($info['avatar'])) {
+                $info['avatar'] = $urlPre . $info['avatar'];
+            }
+        } else {
+            $info = [
+                'mobile' => '13800000000',
+                'name' => 'admin',
+                'avatar' => ''
+            ];
+        }
+
+        return $this->jsonAdminResult(['data' => $info]);
     }
 }
