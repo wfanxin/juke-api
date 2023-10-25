@@ -36,6 +36,7 @@ $dingoApi->version("v1", [
 
     // 网站配置管理
     $dingoApi->get("mobile/config/list", \App\Http\Controllers\Admin\Mobile\ConfigController::class."@list")->name("mobile.config.list");
+    $dingoApi->post("mobile/config/saveConfig", \App\Http\Controllers\Admin\Mobile\ConfigController::class."@saveConfig")->name("mobile.config.saveConfig");
 
     // 会员管理
     $dingoApi->get("mobile/member/list", \App\Http\Controllers\Admin\Mobile\MemberController::class."@list")->name("mobile.member.list");

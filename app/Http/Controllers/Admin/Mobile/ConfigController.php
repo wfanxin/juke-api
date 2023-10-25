@@ -31,83 +31,115 @@ class ConfigController extends Controller
         $params = $request->all();
         $params['userId'] = $request->userId;
 
-        $where = [];
-
         $site = '';
-        $grade = '';
+        $award = ['value' => '', 'scale' => ''];
+        $grade = [];
+        $level_list = config('global.level_list');
+        foreach ($level_list as $value) {
+            if ($value['value'] != 0) {
+                $grade[] = [
+                    'label' => $value['label'],
+                    'money' => ''
+                ];
+            }
+        }
+
+        $config = $mConfig->whereIn('name', ['site', 'award', 'grade'])->get();
+        $config = $this->dbResult($config);
+        foreach ($config as $value) {
+            if ($value['name'] == 'site') {
+                $site = $value['content'];
+            } else if ($value['name'] == 'award') {
+                $award = json_decode($value['content'], true);
+            } else if ($value['name'] == 'grade') {
+                $grade = json_decode($value['content'], true);
+            }
+        }
 
         return $this->jsonAdminResult([
             'site' => $site,
+            'award' => $award,
             'grade' => $grade
         ]);
     }
 
     /**
-     * @name 修改轮播图
-     * @Post("/lv/mobile/slide/edit")
+     * @name 保存配置
+     * @Post("/lv/mobile/config/saveConfig")
      * @Version("v1")
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      **/
-    public function edit(Request $request, Slide $mSlide)
+    public function saveConfig(Request $request, Config $mConfig)
     {
         $params = $request->all();
 
-        $id = $params['id'] ?? 0;
-        $title = $params['title'] ?? '';
-        $image = $params['image'] ?? '';
+        $site = $params['site'] ?? '';
+        $award = $params['award'] ?? [];
+        $grade = $params['grade'] ?? [];
 
-        if (empty($id)) {
-            return $this->jsonAdminResult([],10001, '参数错误');
+        if (empty($site)) {
+            return $this->jsonAdminResult([],10001, '网站名称不能为空');
         }
 
-        if (empty($title)) {
-            return $this->jsonAdminResult([],10001, '标题不能为空');
+        if (empty($award) || empty($award['value'])) {
+            return $this->jsonAdminResult([],10001, '感恩奖额度不能为空');
         }
 
-        if (empty($image)){
-            return $this->jsonAdminResult([],10001, '图片不能为空');
+        if (empty($award) || empty($award['scale'])) {
+            return $this->jsonAdminResult([],10001, '感恩奖比例不能为空');
         }
 
-        $urlPre = config('filesystems.disks.tmp.url');
-        $image = str_replace($urlPre, '', $image);
+        foreach ($grade as $value) {
+            if (empty($value['money'])) {
+                return $this->jsonAdminResult([],10001, '升级金额不能为空');
+            }
+        }
+
+        $config = $mConfig->whereIn('name', ['site', 'award', 'grade'])->get();
+        $config = $this->dbResult($config);
+        $config = array_column($config,'name');
 
         $time = date('Y-m-d H:i:s');
-        $res = $mSlide->where('id', $id)->update([
-            'id' => $id,
-            'title' => $title,
-            'image' => $image,
-            'updated_at' => $time
-        ]);
 
-        if ($res) {
-            return $this->jsonAdminResult();
+        $res1 = true;
+        if (in_array('site', $config)) {
+            $res1 = $mConfig->where('name', 'site')->update(['content' => $site]);
         } else {
-            return $this->jsonAdminResult([],10001,'操作失败');
-        }
-    }
-
-    /**
-     * @name 删除轮播图
-     * @Post("/lv/mobile/slide/del")
-     * @Version("v1")
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     **/
-    public function del(Request $request, Slide $mSlide)
-    {
-        $params = $request->all();
-
-        $id = $params['id'] ?? 0;
-
-        if (empty($id)) {
-            return $this->jsonAdminResult([],10001,'参数错误');
+            $res1 = $mConfig->insert([
+                'name' => 'site',
+                'content' => $site,
+                'created_at' => $time,
+                'updated_at' => $time
+            ]);
         }
 
-        $res = $mSlide->where('id', $id)->delete();
+        $res2 = true;
+        if (in_array('award', $config)) {
+            $res2 = $mConfig->where('name', 'award')->update(['content' => json_encode($award)]);
+        } else {
+            $res2 = $mConfig->insert([
+                'name' => 'award',
+                'content' => json_encode($award),
+                'created_at' => $time,
+                'updated_at' => $time
+            ]);
+        }
 
-        if ($res) {
-            return $this->jsonAdminResultWithLog($request);
+        $res3 = true;
+        if (in_array('grade', $config)) {
+            $res3 = $mConfig->where('name', 'grade')->update(['content' => json_encode($grade)]);
+        } else {
+            $res3 = $mConfig->insert([
+                'name' => 'grade',
+                'content' => json_encode($grade),
+                'created_at' => $time,
+                'updated_at' => $time
+            ]);
+        }
+
+        if ($res1 && $res2 && $res3) {
+            return $this->jsonAdminResult();
         } else {
             return $this->jsonAdminResult([],10001,'操作失败');
         }
