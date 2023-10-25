@@ -34,6 +34,9 @@ $dingoApi->version("v1", [
     $dingoApi->post("mobile/article/edit", \App\Http\Controllers\Admin\Mobile\ArticleController::class."@edit")->name("mobile.article.edit");
     $dingoApi->post("mobile/article/del", \App\Http\Controllers\Admin\Mobile\ArticleController::class."@del")->name("mobile.article.del");
 
+    // 网站配置管理
+    $dingoApi->get("mobile/config/list", \App\Http\Controllers\Admin\Mobile\ConfigController::class."@list")->name("mobile.config.list");
+
     // 会员管理
     $dingoApi->get("mobile/member/list", \App\Http\Controllers\Admin\Mobile\MemberController::class."@list")->name("mobile.member.list");
     $dingoApi->post("mobile/member/edit", \App\Http\Controllers\Admin\Mobile\MemberController::class."@edit")->name("mobile.member.edit");
