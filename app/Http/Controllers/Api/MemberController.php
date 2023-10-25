@@ -66,16 +66,20 @@ class MemberController extends Controller
         }
 
         $inviteUserId = $params['inviteUserId'] ?? 0;
-        $count = $mMember->where('id', $inviteUserId)->where('level', '>', 0)->where('status', 1)->count();
+        $count = $mMember->where('id', $inviteUserId)->where('level', '>=', 4)->where('status', 1)->count();
         $invite_uid = 0;
         if ($count > 0) { // 有推荐人
             $invite_uid = $inviteUserId;
         } else { // 无推荐人
-            $info = $mMember->where('level', '>', 0)->where('status', 1)->orderBy('id', 'desc')->first();
+            $info = $mMember->where('level', '>=', 4)->where('status', 1)->where('system', 1)->orderBy('id', 'desc')->first();
             $info = $this->dbResult($info);
             if (!empty($info)) {
                 $invite_uid = $info['id'];
             }
+        }
+
+        if (empty($invite_uid)) {
+            return $this->jsonAdminResult([],10001,'没有推荐人');
         }
 
         // 数据
@@ -88,7 +92,6 @@ class MemberController extends Controller
             'name' => $name,
             'password' => $password,
             'salt' => $salt,
-            'level' => $invite_uid > 0 ? 0 : 1,
             'status' => 1,
             'created_at' => $time,
             'updated_at' => $time
@@ -129,6 +132,10 @@ class MemberController extends Controller
 
         if ($this->_encodePwd($password, $info['salt']) != $info['password']) {
             return $this->jsonAdminResult([],10001,'账号或密码错误');
+        }
+
+        if ($info['status'] == 3) { // 拉黑
+            return $this->jsonAdminResult([],10001,'拉黑账号不能登录');
         }
 
         $redisKey = config('redisKey');

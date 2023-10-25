@@ -16,4 +16,10 @@ return [
         ['label' => '施', 'value' => 9],
         ['label' => '渡', 'value' => 10],
     ],
+
+    'status_list' => [
+        ['label' => '正常', 'value' => 1],
+        ['label' => '冻结', 'value' => 2],
+        ['label' => '拉黑', 'value' => 3],
+    ]
 ];

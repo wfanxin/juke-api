@@ -54,17 +54,153 @@ class MemberController extends Controller
             $urlPre = config('filesystems.disks.tmp.url');
             $level_list = config('global.level_list');
             $level_list = array_column($level_list, 'label', 'value');
+            $status_list = config('global.status_list');
+            $status_list = array_column($status_list, 'label', 'value');
             foreach ($data->items() as $k => $v) {
                 if (!empty($v->avatar)) {
                     $data->items()[$k]['avatar'] = $urlPre . $v->avatar;
                 }
                 $data->items()[$k]['level_name'] = $level_list[$v->level] ?? '';
+                $data->items()[$k]['status_name'] = $status_list[$v->status] ?? '';
             }
         }
 
         return $this->jsonAdminResult([
             'total' => $data->total(),
-            'data' => $data->items()
+            'data' => $data->items(),
+            'status_list' => config('global.status_list'),
+            'system_num' => $mMember->where('system', 1)->count()
         ]);
+    }
+
+    /**
+     * @name 修改会员
+     * @Post("/lv/mobile/member/edit")
+     * @Version("v1")
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     **/
+    public function edit(Request $request, Member $mMember)
+    {
+        $params = $request->all();
+
+        $id = $params['id'] ?? 0;
+        $status = $params['status'] ?? 0;
+        $password = $params['password'] ?? '';
+        $cfpassword = $params['cfpassword'] ?? '';
+
+        $data = [];
+
+        if (empty($id)) {
+            return $this->jsonAdminResult([],10001, '参数错误');
+        }
+
+        $info = $mMember->where('id', $id)->first();
+        $info = $this->dbResult($info);
+        if (empty($info)) {
+            return $this->jsonAdminResult([],10001, '用户信息不存在');
+        }
+
+        if (empty($status)) {
+            return $this->jsonAdminResult([],10001, '状态不能为空');
+        }
+
+        $data['status'] = $status;
+
+        if (!empty($password)) {
+            if (empty($cfpassword)) {
+                return $this->jsonAdminResult([],10001, '确认新密码不能为空');
+            }
+            if ($password != $cfpassword) {
+                return $this->jsonAdminResult([],10001, '确认新密码不一致');
+            }
+
+            $salt = $info['salt'];
+            $data['password'] = $this->_encodePwd($password, $salt);
+        }
+
+        $res = $mMember->where('id', $id)->update($data);
+
+        if ($res) {
+            return $this->jsonAdminResult();
+        } else {
+            return $this->jsonAdminResult([],10001,'操作失败');
+        }
+    }
+
+    /**
+     * @name 生成系统会员
+     * @Post("/lv/mobile/member/createSystemMember")
+     * @Version("v1")
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     **/
+    public function createSystemMember(Request $request, Member $mMember)
+    {
+        $params = $request->all();
+
+        $image = $params['image'] ?? '';
+        $memberList = $params['memberList'] ?? [];
+
+        if (empty($image)){
+            return $this->jsonAdminResult([],10001, '微信收款码不能为空');
+        }
+
+        if (count($memberList) != 10) {
+            return $this->jsonAdminResult([],10001, '账号不是10个');
+        }
+
+        $count = $mMember->where('system', 1)->count();
+        if ($count > 0) {
+            return $this->jsonAdminResult([],10001, '不用再创建');
+        }
+
+        $pattern = '/^1[0-9]{10}$/';
+        $mobile_arr = [];
+        foreach ($memberList as $value) {
+            if (empty($value['mobile'])) {
+                return $this->jsonAdminResult([],10001, '手机号不能为空');
+            }
+            if (empty($value['name'])) {
+                return $this->jsonAdminResult([],10001, '姓名不能为空');
+            }
+
+            $pattern = '/^1[0-9]{10}$/';
+            if (!preg_match($pattern, $value['mobile'])) {
+                return $this->jsonAdminResult([],10001,'手机号格式不正确');
+            }
+
+            if (in_array($value['mobile'], $mobile_arr)) {
+                return $this->jsonAdminResult([],10001,'手机号【' . $value['mobile'] . '】重复');
+            }
+            $mobile_arr[] = $value['mobile'];
+        }
+
+        $urlPre = config('filesystems.disks.tmp.url');
+        $image = str_replace($urlPre, '', $image);
+
+        $invite_uid = 0;
+        $time = date('Y-m-d H:i:s');
+        foreach ($memberList as $value) {
+            $password = '123456';
+            $salt = rand(1000, 9999);
+            $password = $this->_encodePwd($password, $salt);
+            $data = [
+                'invite_uid' => $invite_uid,
+                'mobile' => $value['mobile'],
+                'name' => $value['name'],
+                'password' => $password,
+                'salt' => $salt,
+                'level' => 10,
+                'status' => 1,
+                'system' => 1,
+                'created_at' => $time,
+                'updated_at' => $time
+            ];
+
+            $invite_uid = $mMember->insertGetId($data);
+        }
+
+        return $this->jsonAdminResult();
     }
 }
