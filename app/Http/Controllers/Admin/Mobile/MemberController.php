@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin\Mobile;
 use App\Http\Controllers\Admin\Controller;
 use App\Http\Traits\FormatTrait;
 use App\Model\Api\Member;
+use App\Model\Api\Payment;
 use Illuminate\Http\Request;
 
 /**
@@ -135,7 +136,7 @@ class MemberController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      **/
-    public function createSystemMember(Request $request, Member $mMember)
+    public function createSystemMember(Request $request, Member $mMember, Payment $mPayment)
     {
         $params = $request->all();
 
@@ -181,12 +182,16 @@ class MemberController extends Controller
 
         $invite_uid = 0;
         $time = date('Y-m-d H:i:s');
+        $pay_method = 2;
+        $content = [];
+        $content['pay_url'] = $image;
         foreach ($memberList as $value) {
             $password = '123456';
             $salt = rand(1000, 9999);
             $password = $this->_encodePwd($password, $salt);
             $data = [
                 'invite_uid' => $invite_uid,
+                'p_uid' => $invite_uid,
                 'mobile' => $value['mobile'],
                 'name' => $value['name'],
                 'password' => $password,
@@ -199,6 +204,21 @@ class MemberController extends Controller
             ];
 
             $invite_uid = $mMember->insertGetId($data);
+
+            $count = $mPayment->where('uid', $invite_uid)->where('pay_method', $pay_method)->count();
+            if ($count > 0) { // 更新
+                $mPayment->where('uid', $invite_uid)->where('pay_method', $pay_method)->update([
+                    'content' => json_encode($content)
+                ]);
+            } else { // 新增
+                $mPayment->insert([
+                    'uid' => $invite_uid,
+                    'pay_method' => $pay_method,
+                    'content' => json_encode($content),
+                    'created_at' => $time,
+                    'updated_at' => $time
+                ]);
+            }
         }
 
         return $this->jsonAdminResult();

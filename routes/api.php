@@ -91,6 +91,9 @@ $dingoApi->version("v1", [
     // 验证码
     $dingoApi->Get("api/captchas/{id}", \App\Http\Controllers\Api\CaptchaController::class."@index")->name("api.captchas.index");
     $dingoApi->Post("api/captchas/check", \App\Http\Controllers\Api\CaptchaController::class."@check")->name("api.captchas.check");
+
+    // 网站名称
+    $dingoApi->get("api/config/getSite", \App\Http\Controllers\Api\ConfigController::class."@getSite")->name("api.config.getSite");
 });
 
 $dingoApi->version("v1", [
@@ -116,6 +119,14 @@ $dingoApi->version("v1", [
 
     // 推荐人信息
     $dingoApi->get("api/user/getInvite", \App\Http\Controllers\Api\MemberController::class."@getInvite")->name("api.user.getInvite");
+
+    // 同修层级用户数量
+    $dingoApi->get("api/our/getOurLevelNum", \App\Http\Controllers\Api\OurController::class."@getOurLevelNum")->name("api.our.getOurLevelNum");
+    // 同修小组列表
+    $dingoApi->get("api/our/getGroupList", \App\Http\Controllers\Api\OurController::class."@getGroupList")->name("api.our.getGroupList");
+
+    // 获取上级用户
+    $dingoApi->get("api/up/getLevelUpMember", \App\Http\Controllers\Api\UpController::class."@getLevelUpMember")->name("api.up.getLevelUpMember");
 });
 
 
