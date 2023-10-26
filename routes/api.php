@@ -127,6 +127,9 @@ $dingoApi->version("v1", [
 
     // 获取上级用户
     $dingoApi->get("api/up/getLevelUpMember", \App\Http\Controllers\Api\UpController::class."@getLevelUpMember")->name("api.up.getLevelUpMember");
+    $dingoApi->post("api/up/levelUp", \App\Http\Controllers\Api\UpController::class."@levelUp")->name("api.up.levelUp");
+    $dingoApi->get("api/up/getPayRecordList", \App\Http\Controllers\Api\UpController::class."@getPayRecordList")->name("api.up.getPayRecordList");
+    $dingoApi->get("api/up/getApplyList", \App\Http\Controllers\Api\UpController::class."@getApplyList")->name("api.up.getApplyList");
 });
 
 

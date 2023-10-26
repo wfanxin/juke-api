@@ -76,6 +76,23 @@ class OurController extends Controller
             $level++;
         }
 
+        if (!empty($data)) {
+            $urlPre = config('filesystems.disks.tmp.url');
+            $invite_uids = array_column($data, 'invite_uid');
+            $list = $mMember->whereIn('id', $invite_uids)->get();
+            $list = $this->dbResult($list);
+            $list = array_column($list, 'name', 'id');
+            foreach ($data as $key => $value) {
+                $value['invite_name'] = $list[$value['invite_uid']] ?? '无';
+                if (!empty($value['avatar'])) {
+                    $value['avatar'] = $urlPre . $value['avatar'];
+                }
+                unset($value['password']);
+                unset($value['salt']);
+                $data[$key] = $value;
+            }
+        }
+
         return $this->jsonAdminResult([
             'data' => $data
         ]);
