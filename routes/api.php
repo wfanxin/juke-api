@@ -43,6 +43,12 @@ $dingoApi->version("v1", [
     $dingoApi->post("mobile/member/edit", \App\Http\Controllers\Admin\Mobile\MemberController::class."@edit")->name("mobile.member.edit");
     $dingoApi->post("mobile/member/createSystemMember", \App\Http\Controllers\Admin\Mobile\MemberController::class."@createSystemMember")->name("mobile.member.createSystemMember");
 
+    // 打款记录
+    $dingoApi->get("mobile/payRecord/list", \App\Http\Controllers\Admin\Mobile\PayRecordController::class."@list")->name("mobile.payRecord.list");
+    $dingoApi->post("mobile/payRecord/add", \App\Http\Controllers\Admin\Mobile\PayRecordController::class."@add")->name("mobile.payRecord.add");
+    $dingoApi->post("mobile/payRecord/edit", \App\Http\Controllers\Admin\Mobile\PayRecordController::class."@edit")->name("mobile.payRecord.edit");
+    $dingoApi->post("mobile/payRecord/del", \App\Http\Controllers\Admin\Mobile\PayRecordController::class."@del")->name("mobile.payRecord.del");
+
     // 用户
     $dingoApi->post("users/checkName", \App\Http\Controllers\Admin\System\UserController::class."@checkName")->name("users.checkName");
     $dingoApi->put("users/pwd", \App\Http\Controllers\Admin\System\UserController::class."@changePwd")->name("users.changePwd");

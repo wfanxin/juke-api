@@ -17,6 +17,12 @@ return [
         ['label' => '渡', 'value' => 10],
     ],
 
+    'pay_method_list' => [
+        ['label' => '银行卡', 'value' => 1],
+        ['label' => '微信', 'value' => 2],
+        ['label' => '支付宝', 'value' => 3],
+    ],
+
     'status_list' => [
         ['label' => '正常', 'value' => 1],
         ['label' => '冻结', 'value' => 2],

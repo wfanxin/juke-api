@@ -29,8 +29,23 @@ class UpController extends Controller
         $pinfo = $mMember->where('id', $info['invite_uid'])->first();
         $pinfo = $this->dbResult($pinfo);
 
-        $paymentList = $mPayment->where('uid', $info['invite_uid'])->get();
-        $paymentList = $this->dbResult($paymentList);
+        $paymentList = [];
+        if ($info['level'] == 0) { // 上级1级，付款给邀请人
+            $paymentList = $mPayment->where('uid', $info['invite_uid'])->get();
+            $paymentList = $this->dbResult($paymentList);
+        }
+
+        $level = 0;
+        if (empty($paymentList) || $info['level'] > $level) {
+            $pinfo = $mMember->where('id', $pinfo['p_uid'])->first();
+            $pinfo = $this->dbResult($pinfo);
+            $level++;
+            if ($info['level'] > $level) {
+                $paymentList = $mPayment->where('uid', $pinfo['id'])->get();
+                $paymentList = $this->dbResult($paymentList);
+            }
+        }
+
         if (!empty($paymentList)) {
             $urlPre = config('filesystems.disks.tmp.url');
             foreach ($paymentList as $k => $v) {
@@ -215,6 +230,9 @@ class UpController extends Controller
             foreach ($list as $key => $value) {
                 $list[$key]['apply_name'] = $member_list[$value['user_id']]['name'] ?? '';
                 $list[$key]['apply_avatar'] = $member_list[$value['user_id']]['avatar'] ?? '';
+                if (!empty($value['pay_url'])) {
+                    $list[$key]['pay_url'] = $urlPre . $value['pay_url'];
+                }
             }
         }
 

@@ -19,7 +19,9 @@ return [
     'nav_show_list' => [
         '@Get:lv_mobile_slide_list',
         '@Get:lv_mobile_article_list',
+        '@Get:lv_mobile_config_list',
         '@Get:lv_mobile_member_list',
+        '@Get:lv_mobile_payRecord_list',
         '@Get:lv_permissions',
         '@Get:lv_roles',
         '@Get:lv_users',
