@@ -100,6 +100,8 @@ $dingoApi->version("v1", [
 
     // 网站名称
     $dingoApi->get("api/config/getSite", \App\Http\Controllers\Api\ConfigController::class."@getSite")->name("api.config.getSite");
+    // 国学视频
+    $dingoApi->get("api/config/getGrade", \App\Http\Controllers\Api\ConfigController::class."@getGrade")->name("api.config.getGrade");
 });
 
 $dingoApi->version("v1", [
@@ -136,6 +138,8 @@ $dingoApi->version("v1", [
     $dingoApi->post("api/up/levelUp", \App\Http\Controllers\Api\UpController::class."@levelUp")->name("api.up.levelUp");
     $dingoApi->get("api/up/getPayRecordList", \App\Http\Controllers\Api\UpController::class."@getPayRecordList")->name("api.up.getPayRecordList");
     $dingoApi->get("api/up/getApplyList", \App\Http\Controllers\Api\UpController::class."@getApplyList")->name("api.up.getApplyList");
+    $dingoApi->get("api/up/getPayRecord", \App\Http\Controllers\Api\UpController::class."@getPayRecord")->name("api.up.getPayRecord");
+    $dingoApi->post("api/up/upVerify", \App\Http\Controllers\Api\UpController::class."@upVerify")->name("api.up.upVerify");
 });
 
 

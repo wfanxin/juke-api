@@ -39,7 +39,8 @@ class ConfigController extends Controller
             if ($value['value'] != 0) {
                 $grade[] = [
                     'label' => $value['label'],
-                    'money' => ''
+                    'money' => '',
+                    'video' => ''
                 ];
             }
         }
@@ -93,6 +94,9 @@ class ConfigController extends Controller
         foreach ($grade as $value) {
             if (empty($value['money'])) {
                 return $this->jsonAdminResult([],10001, '升级金额不能为空');
+            }
+            if (empty($value['video'])) {
+                return $this->jsonAdminResult([],10001, '视频不能为空');
             }
         }
 

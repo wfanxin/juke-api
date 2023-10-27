@@ -6,6 +6,7 @@ use App\Common\Upload;
 use App\Http\Traits\FormatTrait;
 use App\Model\Api\Member;
 use App\Model\Api\Payment;
+use App\Model\Api\PayRecord;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redis;
 
@@ -218,13 +219,16 @@ class MemberController extends Controller
      * 用户信息
      * @param Request $request
      */
-    public function getMember(Request $request, Member $mMember) {
+    public function getMember(Request $request, Member $mMember, PayRecord $mPayRecord) {
         $params = $request->all();
 
         $info = $mMember->where('id', $request->memId)->first(['id', 'mobile', 'name', 'avatar', 'level']);
         $info = $this->dbResult($info);
 
+        $money = $mPayRecord->where('pay_uid', $request->memId)->where('status', 1)->sum('money');
+
         if (!empty($info)) {
+            $info['money'] = $money;
             $level_list = config('global.level_list');
             $level_list = array_column($level_list, 'label', 'value');
             $info['level_name'] = $level_list[$info['level']] ?? '';

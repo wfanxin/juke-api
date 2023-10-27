@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Traits\FormatTrait;
 use App\Model\Api\Config;
+use App\Model\Api\Member;
 use Illuminate\Http\Request;
 
 /**
@@ -29,6 +30,25 @@ class ConfigController extends Controller
 
         return $this->jsonAdminResult([
             'data' => $site
+        ]);
+    }
+
+    /**
+     * 获取国学视频
+     * @param Request $request
+     */
+    public function getGrade(Request $request, Member $mMember, Config $mConfig)
+    {
+        $info = $mConfig->where('name', 'grade')->first();
+        $info = $this->dbResult($info);
+
+        $content = [];
+        if (!empty($info)) {
+            $content = json_decode($info['content'], true) ?? [];
+        }
+
+        return $this->jsonAdminResult([
+            'list' => $content
         ]);
     }
 }

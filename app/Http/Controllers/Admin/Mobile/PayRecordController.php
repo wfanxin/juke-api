@@ -33,7 +33,7 @@ class PayRecordController extends Controller
 
         $where = [];
 
-//        $where[] = ['status', '=', 1];
+        $where[] = ['status', '=', 1];
 
         // 打款人姓名
         if (!empty($params['user_name'])){
