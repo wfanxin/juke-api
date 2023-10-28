@@ -36,14 +36,12 @@ class UpController extends Controller
         }
 
         $level = 0;
-        if (empty($paymentList) || $info['level'] > $level) {
+        while (empty($paymentList) || $info['level'] > $level) {
             $pinfo = $mMember->where('id', $pinfo['p_uid'])->first();
             $pinfo = $this->dbResult($pinfo);
+            $paymentList = $mPayment->where('uid', $pinfo['id'])->get();
+            $paymentList = $this->dbResult($paymentList);
             $level++;
-            if ($info['level'] > $level) {
-                $paymentList = $mPayment->where('uid', $pinfo['id'])->get();
-                $paymentList = $this->dbResult($paymentList);
-            }
         }
 
         if (!empty($paymentList)) {
@@ -291,7 +289,12 @@ class UpController extends Controller
                     $memberList = $mMember->where('p_uid', $value['id'])->get();
                     $memberList = $this->dbResult($memberList);
                     if ($value['status'] == 1 && $value['level'] >= 4 && count($memberList) < $max_num) { // 找到了
-                        $mMember->where('id', $info['user_id'])->update(['p_uid' => $value['id'], 'level' => $info['up_level']]);
+                        if ($info['up_level'] == 1) {
+                            $mMember->where('id', $info['user_id'])->update(['p_uid' => $value['id'], 'level' => $info['up_level']]);
+                        } else {
+                            $mMember->where('id', $info['user_id'])->update(['level' => $info['up_level']]);
+                        }
+
                         $mPayRecord->where('id', $id)->update(['status' => $status]);
                         return $this->jsonAdminResult();
                     }
