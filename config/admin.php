@@ -22,6 +22,7 @@ return [
         '@Get:lv_mobile_config_list',
         '@Get:lv_mobile_member_list',
         '@Get:lv_mobile_payRecord_list',
+        '@Get:lv_mobile_leave_list',
         '@Get:lv_permissions',
         '@Get:lv_roles',
         '@Get:lv_users',

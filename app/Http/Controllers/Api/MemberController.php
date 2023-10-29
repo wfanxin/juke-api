@@ -222,13 +222,10 @@ class MemberController extends Controller
     public function getMember(Request $request, Member $mMember, PayRecord $mPayRecord) {
         $params = $request->all();
 
-        $info = $mMember->where('id', $request->memId)->first(['id', 'mobile', 'name', 'avatar', 'level']);
+        $info = $mMember->where('id', $request->memId)->first();
         $info = $this->dbResult($info);
 
-        $money = $mPayRecord->where('pay_uid', $request->memId)->where('status', 1)->sum('money');
-
         if (!empty($info)) {
-            $info['money'] = $money;
             $level_list = config('global.level_list');
             $level_list = array_column($level_list, 'label', 'value');
             $info['level_name'] = $level_list[$info['level']] ?? '';
@@ -459,10 +456,11 @@ class MemberController extends Controller
     public function getMoneyList(Request $request, Member $mMember, PayRecord $mPayRecord) {
         $params = $request->all();
 
+        $money = $mMember->where('id', $request->memId)->value('money');
+
         $list = $mPayRecord->where('pay_uid', $request->memId)->where('status', 1)->get();
         $list = $this->dbResult($list);
 
-        $money = 0;
         if (!empty($list)) {
             $member_list = $mMember->whereIn('id', array_column($list, 'user_id'))->get();
             $member_list = $this->dbResult($member_list);
@@ -478,15 +476,13 @@ class MemberController extends Controller
             $pay_method_list = config('global.pay_method_list');
             $pay_method_list = array_column($pay_method_list, 'label', 'value');
             foreach ($list as $key => $value) {
-                $money += $value['money'];
                 $list[$key]['user_name'] = $member_list[$value['user_id']]['name'] ?? '';
                 $list[$key]['user_avatar'] = $member_list[$value['user_id']]['avatar'] ?? '';
                 $list[$key]['up_level_name'] = $level_list[$value['up_level']] ?? '';
                 $list[$key]['pay_method_name'] = $pay_method_list[$value['pay_method']] ?? '';
             }
         }
-        
-        return $this->jsonAdminResult(['data' => $list, 'money' => number_format($money, 2)]);
-    }
 
+        return $this->jsonAdminResult(['data' => $list, 'money' => $money]);
+    }
 }

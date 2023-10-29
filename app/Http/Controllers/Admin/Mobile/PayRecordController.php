@@ -33,7 +33,19 @@ class PayRecordController extends Controller
 
         $where = [];
 
-        $where[] = ['status', '=', 1];
+        // 状态
+        if ($params['status'] != '') {
+            $where[] = ['status', '=', $params['status']];
+        }
+
+        // 打款类型
+        if ($params['level'] != '') {
+            if ($params['level'] == 0) {
+                $where[] = ['up_level', '=', 0];
+            } else {
+                $where[] = ['up_level', '!=', 0];
+            }
+        }
 
         // 打款人姓名
         if (!empty($params['user_name'])){
@@ -80,5 +92,93 @@ class PayRecordController extends Controller
             'total' => $data->total(),
             'data' => $data->items()
         ]);
+    }
+
+    /**
+     * @name 打款记录审核
+     * @Post("/lv/mobile/leave/handleStatus")
+     * @Version("v1")
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     **/
+    public function handleStatus(Request $request, Member $mMember, PayRecord $mPayRecord)
+    {
+        $params = $request->all();
+
+        $id = $params['id'] ?? 0;
+        $status = $params['status'] ?? 0;
+
+        if (empty($id)) {
+            return $this->jsonAdminResult([],10001,'参数错误');
+        }
+
+        if (!in_array($status, [1,2])) {
+            return $this->jsonAdminResult([],10001,'状态错误');
+        }
+
+        $info = $mPayRecord->where('id', $id)->first();
+        $info = $this->dbResult($info);
+        if (empty($info)) {
+            return $this->jsonAdminResult([],10001,'审核记录不存在');
+        }
+
+        if ($info['up_level'] == 0) { // 感恩奖
+            if ($status == 1) { // 审核通过
+                $pay_member_info = $mMember->where('id', $info['pay_uid'])->first();
+                $pay_member_info = $this->dbResult($pay_member_info);
+
+                $mPayRecord->where('id', $id)->update(['status' => $status]);
+                $mMember->where('id', $pay_member_info['id'])->update(['money' => $pay_member_info['money'] + $info['money'], 'thank_num' => $pay_member_info['thank_num'] + 1]);
+                return $this->jsonAdminResultWithLog($request);
+            } else {
+                $res = $mPayRecord->where('id', $id)->update(['status' => $status]);
+                if ($res) {
+                    return $this->jsonAdminResultWithLog($request);
+                } else {
+                    return $this->jsonAdminResult([],10001,'操作失败');
+                }
+            }
+        } else { // 升级
+            if ($status == 1) { // 审核通过
+                $pay_member_info = $mMember->where('id', $info['pay_uid'])->first();
+                $pay_member_info = $this->dbResult($pay_member_info);
+                $list = [$pay_member_info];
+                while(1) {
+                    if (empty($list)) {
+                        return $this->jsonAdminResult([],10001,'没有合适的位置');
+                    }
+
+                    $ids = []; // 下级用户id
+                    foreach ($list as $value) {
+                        // 层级上级用户
+                        $memberList = $mMember->where('p_uid', $value['id'])->get();
+                        $memberList = $this->dbResult($memberList);
+                        if ($value['status'] == 1 && $value['level'] >= 4 && count($memberList) < 2) { // 可以挂在当前用户下
+                            if ($info['up_level'] == 1) { // 升级1级的时候，要找个上级
+                                $mMember->where('id', $info['user_id'])->update(['p_uid' => $value['id'], 'level' => $info['up_level']]);
+                            } else {
+                                $mMember->where('id', $info['user_id'])->update(['level' => $info['up_level']]);
+                            }
+
+                            $mPayRecord->where('id', $id)->update(['status' => $status]);
+                            $mMember->where('id', $pay_member_info['id'])->update(['money' => $pay_member_info['money'] + $info['money']]);
+                            return $this->jsonAdminResultWithLog($request);
+                        }
+
+                        $ids = array_merge($ids, array_column($memberList, 'id'));
+                    }
+
+                    $list = $mMember->whereIn('id', $ids)->get();
+                    $list = $this->dbResult($list);
+                }
+            } else { // 审核失败
+                $res = $mPayRecord->where('id', $id)->update(['status' => $status]);
+                if ($res) {
+                    return $this->jsonAdminResultWithLog($request);
+                } else {
+                    return $this->jsonAdminResult([],10001,'操作失败');
+                }
+            }
+        }
     }
 }

@@ -10,17 +10,17 @@ use App\Model\Api\PayRecord;
 use Illuminate\Http\Request;
 
 /**
- * 升级
+ * 感恩奖
  */
-class UpController extends Controller
+class ThankController extends Controller
 {
     use FormatTrait;
 
     /**
-     * 获取上级用户
+     * 获取上级邀请用户
      * @param Request $request
      */
-    public function getLevelUpMember(Request $request, Member $mMember, Payment $mPayment, Config $mConfig)
+    public function getThankUpMember(Request $request, Member $mMember, Payment $mPayment, Config $mConfig)
     {
         $info = $mMember->where('id', $request->memId)->first();
         $info = $this->dbResult($info);
@@ -29,19 +29,15 @@ class UpController extends Controller
         $pinfo = $mMember->where('id', $info['invite_uid'])->first();
         $pinfo = $this->dbResult($pinfo);
 
-        $paymentList = [];
-        if ($info['level'] == 0) { // 上级1级，付款给邀请人
-            $paymentList = $mPayment->where('uid', $info['invite_uid'])->get();
-            $paymentList = $this->dbResult($paymentList);
-        }
+        $paymentList = $mPayment->where('uid', $pinfo['id'])->get();
+        $paymentList = $this->dbResult($paymentList);
 
-        $level = 0;
-        while (empty($paymentList) || $info['level'] > $level) {
-            $pinfo = $mMember->where('id', $pinfo['p_uid'])->first();
+        while (empty($paymentList) || $pinfo['level'] < 4 || $pinfo['status'] != 1) { // 邀请人不符合条件，则找上级邀请人
+            $pinfo = $mMember->where('id', $pinfo['invite_uid'])->first();
             $pinfo = $this->dbResult($pinfo);
+
             $paymentList = $mPayment->where('uid', $pinfo['id'])->get();
             $paymentList = $this->dbResult($paymentList);
-            $level++;
         }
 
         if (!empty($paymentList)) {
@@ -55,15 +51,20 @@ class UpController extends Controller
             }
         }
 
-        $grade = $mConfig->where('name', 'grade')->first();
-        $grade = $this->dbResult($grade);
-        $grade_list = [];
-        if (!empty($grade)) {
-            $grade_list = json_decode($grade['content'], true);
+        $award = $mConfig->where('name', 'award')->first();
+        $award = $this->dbResult($award);
+        if (empty($award)) {
+            return $this->jsonAdminResult([],10001,'感恩奖没有配置');
         }
 
-        if (!empty($pinfo)) {
-            $pinfo['money'] = $grade_list[$info['level']]['money'] ?? '';
+        $award = json_decode($award['content'], true) ?? [];
+        if (empty($award)) {
+            return $this->jsonAdminResult([],10001,'感恩奖没有配置');
+        }
+
+        $pinfo['money'] = ($award['value'] ?? 0) * ($award['scale'] ?? 0) * 0.01;
+        if ($pinfo['money'] <= 0) {
+            return $this->jsonAdminResult([],10001,'感恩奖配置错误');
         }
 
         return $this->jsonAdminResult([
@@ -73,10 +74,10 @@ class UpController extends Controller
     }
 
     /**
-     * 立即升级
+     * 添加感恩奖
      * @param Request $request
      */
-    public function levelUp(Request $request, Member $mMember, PayRecord $mPayRecord)
+    public function thankUp(Request $request, Member $mMember, PayRecord $mPayRecord)
     {
         $params = $request->all();
 
@@ -97,34 +98,20 @@ class UpController extends Controller
             return $this->jsonAdminResult([],10001,'请上传付款凭证');
         }
 
-        $info = $mMember->where('id', $request->memId)->first();
-        $info = $this->dbResult($info);
-        if (empty($info)) {
-            return $this->jsonAdminResult([],10001,'用户信息不存在');
-        }
-
         $urlPre = config('filesystems.disks.tmp.url');
         $pay_url = str_replace($urlPre, '', $pay_url);
-        $data = [
+
+        $time = date('Y-m-d H:i:s');
+        $res = $mPayRecord->insert([
             'user_id' => $request->memId,
-            'up_level' => $info['level'] + 1,
+            'up_level' => 0,
             'pay_uid' => $pay_uid,
             'pay_method' => $pay_method,
             'pay_url' => $pay_url,
-            'money' => $money
-        ];
-
-        $count = $mPayRecord->where('user_id', $data['user_id'])->where('up_level', $data['up_level'])->count();
-        $time = date('Y-m-d H:i:s');
-        $res = true;
-        if ($count > 0) { // 更新
-            $data['status'] = 0; // 审核中
-            $res = $mPayRecord->where('user_id', $data['user_id'])->where('up_level', $data['up_level'])->update($data);
-        } else { // 新增
-            $data['created_at'] = $time;
-            $data['updated_at'] = $time;
-            $res = $mPayRecord->insert($data);
-        }
+            'money' => $money,
+            'created_at' => $time,
+            'updated_at' => $time
+        ]);
 
         if ($res) {
             return $this->jsonAdminResult();
@@ -134,17 +121,17 @@ class UpController extends Controller
     }
 
     /**
-     * 升级记录
+     * 感恩奖记录
      * @param Request $request
      */
-    public function getPayRecordList(Request $request, Member $mMember, PayRecord $mPayRecord)
+    public function getThankList(Request $request, Member $mMember, PayRecord $mPayRecord)
     {
-        $list = $mPayRecord->where('user_id', $request->memId)->orderBy('id', 'desc')->get();
+        $list = $mPayRecord->where('user_id', $request->memId)->where('up_level', 0)->orderBy('id', 'desc')->get();
         $list = $this->dbResult($list);
 
         if (!empty($list)) {
-            $level_list = config('global.level_list');
-            $level_list = array_column($level_list, 'label', 'value');
+            $pay_method_list = config('global.pay_method_list');
+            $pay_method_list = array_column($pay_method_list, 'label', 'value');
             $urlPre = config('filesystems.disks.tmp.url');
             $pay_uids = array_column($list, 'pay_uid');
             $member_list = $mMember->whereIn('id', $pay_uids)->get();
@@ -159,7 +146,7 @@ class UpController extends Controller
             foreach ($list as $key => $value) {
                 $list[$key]['pay_name'] = $member_list[$value['pay_uid']]['name'] ?? '';
                 $list[$key]['pay_avatar'] = $member_list[$value['pay_uid']]['avatar'] ?? '';
-                $list[$key]['up_level_name'] = $level_list[$value['up_level']] ?? '';
+                $list[$key]['pay_method_name'] = $pay_method_list[$value['pay_method']] ?? '';
             }
         }
 
@@ -169,12 +156,12 @@ class UpController extends Controller
     }
 
     /**
-     * 获取申请记录
+     * 感恩奖审核记录
      * @param Request $request
      */
     public function getApplyList(Request $request, Member $mMember, PayRecord $mPayRecord)
     {
-        $list = $mPayRecord->where('pay_uid', $request->memId)->where('up_level', '!=', 0)->get();
+        $list = $mPayRecord->where('pay_uid', $request->memId)->where('up_level', '=', 0)->get();
         $list = $this->dbResult($list);
 
         if (!empty($list)) {
@@ -207,54 +194,10 @@ class UpController extends Controller
     }
 
     /**
-     * 获取申请记录
+     * 感恩奖审核操作
      * @param Request $request
      */
-    public function getPayRecord(Request $request, Member $mMember, PayRecord $mPayRecord, Payment $mPayment)
-    {
-        $params = $request->all();
-
-        if (empty($params['id'])) {
-            return $this->jsonAdminResult([],10001,'参数错误');
-        }
-
-        $urlPre = config('filesystems.disks.tmp.url');
-
-        $payRecord = $mPayRecord->where('id', $params['id'])->first();
-        $payRecord = $this->dbResult($payRecord);
-
-        if (!empty($payRecord['pay_url'])) {
-            $payRecord['pay_url'] = $urlPre . $payRecord['pay_url'];
-        }
-
-        $pmember = $mMember->where('id', $payRecord['pay_uid'])->first();
-        $pmember = $this->dbResult($pmember);
-
-        $paymentList = $mPayment->where('uid', $payRecord['pay_uid'])->get();
-        $paymentList = $this->dbResult($paymentList);
-
-        if (!empty($paymentList)) {
-            foreach ($paymentList as $k => $v) {
-                $content = json_decode($v['content'], true);
-                if (in_array($v['pay_method'], [2, 3])) {
-                    $content['pay_url'] = $urlPre . $content['pay_url'];
-                }
-                $paymentList[$k]['content'] = $content;
-            }
-        }
-
-        return $this->jsonAdminResult([
-            'pmember' => $pmember,
-            'paymentList' => $paymentList,
-            'payRecord' => $payRecord
-        ]);
-    }
-
-    /**
-     * 审核操作
-     * @param Request $request
-     */
-    public function upVerify(Request $request, Member $mMember, PayRecord $mPayRecord)
+    public function thankVerify(Request $request, Member $mMember, PayRecord $mPayRecord)
     {
         $params = $request->all();
 
@@ -275,38 +218,15 @@ class UpController extends Controller
             return $this->jsonAdminResult([],10001,'审核记录不存在');
         }
 
+
         if ($status == 1) { // 审核通过
             $pay_member_info = $mMember->where('id', $info['pay_uid'])->first();
             $pay_member_info = $this->dbResult($pay_member_info);
-            $list = [$pay_member_info];
-            while(1) {
-                if (empty($list)) {
-                    return $this->jsonAdminResult([],10001,'没有合适的位置');
-                }
 
-                $ids = []; // 下级用户id
-                foreach ($list as $value) {
-                    // 层级上级用户
-                    $memberList = $mMember->where('p_uid', $value['id'])->get();
-                    $memberList = $this->dbResult($memberList);
-                    if ($value['status'] == 1 && $value['level'] >= 4 && count($memberList) < 2) { // 可以挂在当前用户下
-                        if ($info['up_level'] == 1) {
-                            $mMember->where('id', $info['user_id'])->update(['p_uid' => $value['id'], 'level' => $info['up_level']]);
-                        } else {
-                            $mMember->where('id', $info['user_id'])->update(['level' => $info['up_level']]);
-                        }
+            $mPayRecord->where('id', $id)->update(['status' => $status]);
+            $mMember->where('id', $pay_member_info['id'])->update(['money' => $pay_member_info['money'] + $info['money'], 'thank_num' => $pay_member_info['thank_num'] + 1]);
+            return $this->jsonAdminResult();
 
-                        $mPayRecord->where('id', $id)->update(['status' => $status]);
-                        $mMember->where('id', $pay_member_info['id'])->update(['money' => $pay_member_info['money'] + $info['money']]);
-                        return $this->jsonAdminResult();
-                    }
-
-                    $ids = array_merge($ids, array_column($memberList, 'id'));
-                }
-
-                $list = $mMember->whereIn('id', $ids)->get();
-                $list = $this->dbResult($list);
-            }
         } else { // 审核失败
             $res = $mPayRecord->where('id', $id)->update(['status' => $status]);
             if ($res) {

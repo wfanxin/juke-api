@@ -45,9 +45,11 @@ $dingoApi->version("v1", [
 
     // 打款记录
     $dingoApi->get("mobile/payRecord/list", \App\Http\Controllers\Admin\Mobile\PayRecordController::class."@list")->name("mobile.payRecord.list");
-    $dingoApi->post("mobile/payRecord/add", \App\Http\Controllers\Admin\Mobile\PayRecordController::class."@add")->name("mobile.payRecord.add");
-    $dingoApi->post("mobile/payRecord/edit", \App\Http\Controllers\Admin\Mobile\PayRecordController::class."@edit")->name("mobile.payRecord.edit");
-    $dingoApi->post("mobile/payRecord/del", \App\Http\Controllers\Admin\Mobile\PayRecordController::class."@del")->name("mobile.payRecord.del");
+    $dingoApi->post("mobile/payRecord/handleStatus", \App\Http\Controllers\Admin\Mobile\PayRecordController::class."@handleStatus")->name("mobile.payRecord.handleStatus");
+
+    // 留言管理
+    $dingoApi->get("mobile/leave/list", \App\Http\Controllers\Admin\Mobile\LeaveController::class."@list")->name("mobile.leave.list");
+    $dingoApi->post("mobile/leave/handleStatus", \App\Http\Controllers\Admin\Mobile\LeaveController::class."@handleStatus")->name("mobile.leave.handleStatus");
 
     // 用户
     $dingoApi->post("users/checkName", \App\Http\Controllers\Admin\System\UserController::class."@checkName")->name("users.checkName");
@@ -143,6 +145,18 @@ $dingoApi->version("v1", [
     $dingoApi->get("api/up/getApplyList", \App\Http\Controllers\Api\UpController::class."@getApplyList")->name("api.up.getApplyList");
     $dingoApi->get("api/up/getPayRecord", \App\Http\Controllers\Api\UpController::class."@getPayRecord")->name("api.up.getPayRecord");
     $dingoApi->post("api/up/upVerify", \App\Http\Controllers\Api\UpController::class."@upVerify")->name("api.up.upVerify");
+
+    // 感恩奖
+    $dingoApi->get("api/thank/getThankUpMember", \App\Http\Controllers\Api\ThankController::class."@getThankUpMember")->name("api.thank.getThankUpMember");
+    $dingoApi->post("api/thank/thankUp", \App\Http\Controllers\Api\ThankController::class."@thankUp")->name("api.thank.thankUp");
+    $dingoApi->get("api/thank/getThankList", \App\Http\Controllers\Api\ThankController::class."@getThankList")->name("api.thank.getThankList");
+    $dingoApi->get("api/thank/getApplyList", \App\Http\Controllers\Api\ThankController::class."@getApplyList")->name("api.thank.getApplyList");
+    $dingoApi->post("api/thank/thankVerify", \App\Http\Controllers\Api\ThankController::class."@thankVerify")->name("api.thank.thankVerify");
+
+
+    // 添加留言
+    $dingoApi->post("api/leave/add", \App\Http\Controllers\Api\LeaveController::class."@add")->name("api.leave.add");
+    $dingoApi->get("api/leave/list", \App\Http\Controllers\Api\LeaveController::class."@list")->name("api.leave.list");
 });
 
 

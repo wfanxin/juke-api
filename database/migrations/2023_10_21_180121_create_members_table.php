@@ -22,6 +22,8 @@ class CreateMembersTable extends Migration
             $table->string('password', 255)->default('')->comment('密码');
             $table->string('salt', 255)->default('')->comment('密码盐值');
             $table->string('avatar', 500)->default('')->comment('头像');
+            $table->decimal('money', 10, 2)->default(0)->comment('金额');
+            $table->integer('thank_num')->default(0)->comment('感恩次数');
             $table->tinyInteger('level')->default(0)->comment('等级');
             $table->tinyInteger('status')->default(0)->comment('状态：1：正常；2：冻结；3：拉黑');
             $table->tinyInteger('system')->default(0)->comment('系统：0：否；1：是');
