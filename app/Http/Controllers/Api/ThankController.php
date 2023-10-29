@@ -224,7 +224,8 @@ class ThankController extends Controller
             $pay_member_info = $this->dbResult($pay_member_info);
 
             $mPayRecord->where('id', $id)->update(['status' => $status]);
-            $mMember->where('id', $pay_member_info['id'])->update(['money' => $pay_member_info['money'] + $info['money'], 'thank_num' => $pay_member_info['thank_num'] + 1]);
+            $mMember->where('id', $pay_member_info['id'])->update(['money' => $pay_member_info['money'] + $info['money']]);
+            $mMember->where('id', $info['user_id'])->increment('thank_num', 1);
             return $this->jsonAdminResult();
 
         } else { // 审核失败
