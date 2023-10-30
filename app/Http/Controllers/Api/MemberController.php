@@ -68,9 +68,9 @@ class MemberController extends Controller
         $inviteUserId = $params['inviteUserId'] ?? 0;
         $count = $mMember->where('id', $inviteUserId)->where('level', '>=', 4)->where('status', 1)->count();
         $invite_uid = 0;
-        if ($count > 0) { // 有推荐人
+        if ($count > 0) { // 有邀请人
             $invite_uid = $inviteUserId;
-        } else { // 无推荐人
+        } else { // 无邀请人，则邀请人为系统用户最底层用户
             $info = $mMember->where('level', '>=', 4)->where('status', 1)->where('system', 1)->orderBy('id', 'desc')->first();
             $info = $this->dbResult($info);
             if (!empty($info)) {
@@ -79,8 +79,10 @@ class MemberController extends Controller
         }
 
         if (empty($invite_uid)) {
-            return $this->jsonAdminResult([],10001,'没有推荐人');
+            return $this->jsonAdminResult([],10001,'没有邀请人');
         }
+
+        $p_uid = $mMember->getPuid($invite_uid);
 
         // 数据
         $time = date('Y-m-d H:i:s');
@@ -88,6 +90,7 @@ class MemberController extends Controller
         $password = $this->_encodePwd($password, $salt);
         $data = [
             'invite_uid' => $invite_uid,
+            'p_uid' => $p_uid,
             'mobile' => $mobile,
             'name' => $name,
             'password' => $password,
@@ -225,8 +228,7 @@ class MemberController extends Controller
         $info = $this->dbResult($info);
 
         if (!empty($info)) {
-            $level_list = config('global.level_list');
-            $level_list = array_column($level_list, 'label', 'value');
+            $level_list = $mMember->getLevelList();
             $info['level_name'] = $level_list[$info['level']] ?? '';
             $urlPre = config('filesystems.disks.tmp.url');
             if (!empty($info['avatar'])) {
@@ -430,8 +432,7 @@ class MemberController extends Controller
         $info = $this->dbResult($info);
 
         if (!empty($info)) {
-            $level_list = config('global.level_list');
-            $level_list = array_column($level_list, 'label', 'value');
+            $level_list = $mMember->getLevelList();
             $info['level_name'] = $level_list[$info['level']] ?? '';
             $urlPre = config('filesystems.disks.tmp.url');
             if (!empty($info['avatar'])) {
@@ -470,8 +471,7 @@ class MemberController extends Controller
                 }
             }
             $member_list = array_column($member_list, null, 'id');
-            $level_list = config('global.level_list');
-            $level_list = array_column($level_list, 'label', 'value');
+            $level_list = $mMember->getLevelList();
             $pay_method_list = config('global.pay_method_list');
             $pay_method_list = array_column($pay_method_list, 'label', 'value');
             foreach ($list as $key => $value) {

@@ -23,7 +23,7 @@ class OurController extends Controller
         $data = [];
         $level = 1;
         $p_uids = [$request->memId];
-        while ($level <= 10) {
+        while ($level <= 20) {
             $list = $mMember->whereIn('p_uid', $p_uids)->get(['id']);
             $list = $this->dbResult($list);
             $data[] = [
@@ -63,7 +63,7 @@ class OurController extends Controller
         $data = [];
         $level = 1;
         $p_uids = [$request->memId];
-        while ($level <= 10) {
+        while ($level <= 20) {
             $list = $mMember->whereIn('p_uid', $p_uids)->get();
             $list = $this->dbResult($list);
 

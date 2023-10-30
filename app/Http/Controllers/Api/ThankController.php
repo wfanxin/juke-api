@@ -175,8 +175,7 @@ class ThankController extends Controller
                 }
             }
             $member_list = array_column($member_list, null, 'id');
-            $level_list = config('global.level_list');
-            $level_list = array_column($level_list, 'label', 'value');
+            $level_list = $mMember->getLevelList();
 
             foreach ($list as $key => $value) {
                 $list[$key]['apply_name'] = $member_list[$value['user_id']]['name'] ?? '';

@@ -122,7 +122,7 @@ class PayRecordController extends Controller
             return $this->jsonAdminResult([],10001,'审核记录不存在');
         }
 
-        if ($info['status'] == 0) {
+        if ($info['status'] != 0) {
             return $this->jsonAdminResult([],10001,'不是待审核状态不能操作');
         }
 

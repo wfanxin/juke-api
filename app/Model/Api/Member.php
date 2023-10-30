@@ -64,4 +64,27 @@ class Member extends Model
 
         return $level_list;
     }
+
+    /**
+     * 注册获取上级id
+     * @param $invite_uid
+     * @return mixed
+     */
+    public function getPuid($invite_uid) {
+        $list = $this->where('id', $invite_uid)->get();
+        $list = $this->dbResult($list);
+        while (1) {
+            $temp_list = [];
+            foreach ($list as $value) {
+                $child_list = $this->where('p_uid', $value['id'])->get();
+                $child_list = $this->dbResult($child_list);
+                if (count($child_list) < 2) { // 找到了
+                    return $value['id'];
+                }
+
+                $temp_list = array_merge($temp_list, $child_list);
+            }
+            $list = $temp_list;
+        }
+    }
 }
