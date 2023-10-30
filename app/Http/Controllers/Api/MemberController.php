@@ -412,7 +412,7 @@ class MemberController extends Controller
             }
 
             $data[$value['pay_method']] = $content;
-            $pay_method = $value['pay_method'];
+            $pay_method = $value['pay_method']; // 最后一次的收款方式优先
         }
 
         return $this->jsonAdminResult(['pay_method' => $pay_method, 'list' => $data]);
@@ -456,12 +456,15 @@ class MemberController extends Controller
     public function getMoneyList(Request $request, Member $mMember, PayRecord $mPayRecord) {
         $params = $request->all();
 
+        // 收益总额
         $money = $mMember->where('id', $request->memId)->value('money');
 
+        // 收益明细
         $list = $mPayRecord->where('pay_uid', $request->memId)->where('status', 1)->get();
         $list = $this->dbResult($list);
 
         if (!empty($list)) {
+            // 付款人列表
             $member_list = $mMember->whereIn('id', array_column($list, 'user_id'))->get();
             $member_list = $this->dbResult($member_list);
             $urlPre = config('filesystems.disks.tmp.url');
