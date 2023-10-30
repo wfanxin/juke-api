@@ -147,13 +147,13 @@ class MemberController extends Controller
             return $this->jsonAdminResult([],10001, '微信收款码不能为空');
         }
 
-        if (count($memberList) != 10) {
-            return $this->jsonAdminResult([],10001, '账号不是10个');
+        if (count($memberList) != 20) {
+            return $this->jsonAdminResult([],10001, '账号不是20个');
         }
 
         $count = $mMember->where('system', 1)->count();
         if ($count > 0) {
-            return $this->jsonAdminResult([],10001, '不用再创建');
+            return $this->jsonAdminResult([],10001, '系统账号已存在，不用再创建');
         }
 
         $pattern = '/^1[0-9]{10}$/';
@@ -196,7 +196,7 @@ class MemberController extends Controller
                 'name' => $value['name'],
                 'password' => $password,
                 'salt' => $salt,
-                'level' => 10,
+                'level' => 20,
                 'status' => 1,
                 'system' => 1,
                 'created_at' => $time,
