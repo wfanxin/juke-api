@@ -153,7 +153,6 @@ $dingoApi->version("v1", [
     $dingoApi->get("api/thank/getApplyList", \App\Http\Controllers\Api\ThankController::class."@getApplyList")->name("api.thank.getApplyList");
     $dingoApi->post("api/thank/thankVerify", \App\Http\Controllers\Api\ThankController::class."@thankVerify")->name("api.thank.thankVerify");
 
-
     // 添加留言
     $dingoApi->post("api/leave/add", \App\Http\Controllers\Api\LeaveController::class."@add")->name("api.leave.add");
     $dingoApi->get("api/leave/list", \App\Http\Controllers\Api\LeaveController::class."@list")->name("api.leave.list");

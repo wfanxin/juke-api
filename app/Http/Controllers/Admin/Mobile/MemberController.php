@@ -53,8 +53,7 @@ class MemberController extends Controller
 
         if (!empty($data->items())) {
             $urlPre = config('filesystems.disks.tmp.url');
-            $level_list = config('global.level_list');
-            $level_list = array_column($level_list, 'label', 'value');
+            $level_list = $mMember->getLevelList();
             $status_list = config('global.status_list');
             $status_list = array_column($status_list, 'label', 'value');
             foreach ($data->items() as $k => $v) {

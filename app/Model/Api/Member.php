@@ -11,6 +11,11 @@ class Member extends Model
     use FormatTrait;
     public $table = 'members';
 
+    /**
+     * 是否满足感恩奖条件
+     * @param $user_id
+     * @return bool
+     */
     public function isThank($user_id) {
         $info = $this->where('id', $user_id)->first();
         $info = $this->dbResult($info);
@@ -37,5 +42,26 @@ class Member extends Model
         }
 
         return intval($info['money'] / $money) <= $info['thank_num'];
+    }
+
+    /**
+     * 获取等级配置
+     * @return array
+     */
+    public function getLevelList() {
+        $level_list = config('global.level_list');
+
+        $count = count($level_list);
+        $level_item = $level_list[$count - 1]; // 获取最后一项
+
+        while ($count <= 20) {
+            $level_item['value'] = $count;
+            $level_list[$count] = $level_item;
+            $count++;
+        }
+
+        $level_list = array_column($level_list, 'label', 'value');
+
+        return $level_list;
     }
 }
