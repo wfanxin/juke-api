@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin\Mobile;
 
 use App\Http\Controllers\Admin\Controller;
 use App\Http\Traits\FormatTrait;
-use App\Model\Admin\Slide;
 use App\Model\Api\Config;
 use Illuminate\Http\Request;
 

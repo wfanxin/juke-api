@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Common\Upload;
 use App\Http\Traits\FormatTrait;
 use App\Model\Api\Member;
 use App\Model\Api\Payment;
