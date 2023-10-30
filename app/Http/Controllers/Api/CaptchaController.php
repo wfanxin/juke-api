@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api;
 use Gregwar\Captcha\CaptchaBuilder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redis;
-use function AlibabaCloud\Client\json;
 
 /**
  * 验证码

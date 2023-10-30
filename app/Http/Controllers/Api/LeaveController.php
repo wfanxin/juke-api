@@ -3,9 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Traits\FormatTrait;
-use App\Model\Api\Config;
 use App\Model\Api\Leave;
-use App\Model\Api\Member;
 use Illuminate\Http\Request;
 
 /**
@@ -54,7 +52,7 @@ class LeaveController extends Controller
     }
 
     /**
-     * 添加留言
+     * 留言列表
      * @param Request $request
      */
     public function list(Request $request, Leave $mLeave)
