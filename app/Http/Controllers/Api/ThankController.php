@@ -32,7 +32,7 @@ class ThankController extends Controller
         $paymentList = $mPayment->where('uid', $pinfo['id'])->get();
         $paymentList = $this->dbResult($paymentList);
 
-        while (empty($paymentList) || $pinfo['level'] < 4 || $pinfo['status'] != 1) { // 邀请人不符合条件，则找上级邀请人
+        while (empty($paymentList) || $pinfo['level'] < 4 || $pinfo['status'] != 1 || !$mMember->isThank()) { // 邀请人不符合条件，则找上级邀请人
             $pinfo = $mMember->where('id', $pinfo['invite_uid'])->first();
             $pinfo = $this->dbResult($pinfo);
 
@@ -126,7 +126,7 @@ class ThankController extends Controller
      */
     public function getThankList(Request $request, Member $mMember, PayRecord $mPayRecord)
     {
-        $list = $mPayRecord->where('user_id', $request->memId)->where('up_level', 0)->orderBy('id', 'desc')->get();
+        $list = $mPayRecord->where('user_id', $request->memId)->where('up_level', 0)->orderBy('id', 'desc')->get(); // 0为感恩奖
         $list = $this->dbResult($list);
 
         if (!empty($list)) {
@@ -217,6 +217,9 @@ class ThankController extends Controller
             return $this->jsonAdminResult([],10001,'审核记录不存在');
         }
 
+        if ($info['status'] != 0) {
+            return $this->jsonAdminResult([],10001,'不是待审核状态不能操作');
+        }
 
         if ($status == 1) { // 审核通过
             $pay_member_info = $mMember->where('id', $info['pay_uid'])->first();

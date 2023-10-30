@@ -28,7 +28,7 @@ class UpController extends Controller
         $pinfo = $info;
         $paymentList = [];
         $level = 0;
-        while (empty($paymentList) || $info['level'] >= $level) {
+        while (empty($paymentList) || $info['level'] >= $level || $pinfo['level'] < 4 || $pinfo['status'] != 1 || $pinfo['level'] <= $info['level']) {
             $pinfo = $mMember->where('id', $pinfo['p_uid'])->first();
             $pinfo = $this->dbResult($pinfo);
             $paymentList = $mPayment->where('uid', $pinfo['id'])->get();
@@ -49,13 +49,15 @@ class UpController extends Controller
 
         $grade = $mConfig->where('name', 'grade')->first();
         $grade = $this->dbResult($grade);
-        $grade_list = [];
-        if (!empty($grade)) {
-            $grade_list = json_decode($grade['content'], true);
+        if (empty($grade)) {
+            return $this->jsonAdminResult([],10001,'网站未配置');
         }
 
+        $grade_list = json_decode($grade['content'], true);
+
         if (!empty($pinfo)) {
-            $pinfo['money'] = $grade_list[$info['level']]['money'] ?? '';
+            // 后面没有配置的用最后一项的配置值
+            $pinfo['money'] = $grade_list[$info['level']]['money'] ?? $grade_list[count($grade_list) - 1]['money'];
         }
 
         return $this->jsonAdminResult([
@@ -165,7 +167,7 @@ class UpController extends Controller
      */
     public function getApplyList(Request $request, Member $mMember, PayRecord $mPayRecord)
     {
-        $list = $mPayRecord->where('pay_uid', $request->memId)->where('up_level', '!=', 0)->get();
+        $list = $mPayRecord->where('pay_uid', $request->memId)->where('up_level', '!=', 0)->get(); // 不等于0为升级
         $list = $this->dbResult($list);
 
         if (!empty($list)) {
@@ -197,7 +199,7 @@ class UpController extends Controller
     }
 
     /**
-     * 获取申请记录
+     * 获取申请详情
      * @param Request $request
      */
     public function getPayRecord(Request $request, Member $mMember, PayRecord $mPayRecord, Payment $mPayment)
@@ -241,7 +243,7 @@ class UpController extends Controller
     }
 
     /**
-     * 审核操作
+     * 升级审核操作
      * @param Request $request
      */
     public function upVerify(Request $request, Member $mMember, PayRecord $mPayRecord)
