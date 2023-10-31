@@ -15,7 +15,7 @@ class ExpireMemberDeal extends Command
 
     protected $description = '会员24小时未升级到4级处理';
 
-    protected $expire_time = 12 * 60 * 60; // 24小时限制
+    protected $expire_time = 24 * 60 * 60; // 24小时限制
     protected $mMember = null;
 
     public function __construct()
@@ -25,6 +25,7 @@ class ExpireMemberDeal extends Command
 
     public function handle()
     {
+        $this->_log('会员24小时未升级到4级处理开始');
         $this->mMember = new Member();
         while (1) {
             $expire_date = date('Y-m-d H:i:s', time() - $this->expire_time);
@@ -39,23 +40,45 @@ class ExpireMemberDeal extends Command
                 $this->doHandle($value);
             }
         }
+        $this->_log('会员24小时未升级到4级处理结束');
     }
 
     public function doHandle($data) {
-        $child_list = $this->mMember->where('p_uid', $data['id']);
+        $child_list = $this->mMember->where('p_uid', $data['id'])->get();
         $child_list = $this->dbResult($child_list);
         if (empty($child_list)) { // 没有子节点，直接删除
-            var_dump(0);
+            // 直接删除
+            $this->mMember->where('id', $data['id'])->delete();
+            $this->_log('删除用户' . $data['id']);
+            $this->_log($data);
             return true;
         }
 
         if (count($child_list) == 1) { // 有1个子节点，删除后，子节点顶替他的位置
-            var_dump(1);
+            // 直接删除
+            $this->mMember->where('id', $data['id'])->delete();
+            $this->_log('删除用户' . $data['id']);
+            $this->_log($data);
+
+            // 子节点顶替他的位置
+            $this->mMember->where('id', $child_list[0]['id'])->update(['p_uid' => $data['p_uid']]);
             return true;
         }
 
         if (count($child_list) > 1) { // 有大于1个子节点，删除后，左子节点顶替他的位置，其他节点到左子节点下面
-            var_dump(2);
+            // 直接删除
+            $this->mMember->where('id', $data['id'])->delete();
+            $this->_log('删除用户' . $data['id']);
+            $this->_log($data);
+
+            // 其他节点到左子节点下面
+            $left_child = $child_list[0]; // 左子节点
+            unset($child_list[0]); // 其他节点
+
+            foreach ($child_list as $other) {
+                $p_uid = $this->mMember->getPuid($left_child['id']);
+                $this->mMember->where('id', $other['id'])->update(['p_uid' => $p_uid]);
+            }
             return true;
         }
     }
