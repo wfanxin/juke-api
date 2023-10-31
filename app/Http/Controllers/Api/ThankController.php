@@ -32,7 +32,7 @@ class ThankController extends Controller
         $paymentList = $mPayment->where('uid', $pinfo['id'])->get();
         $paymentList = $this->dbResult($paymentList);
 
-        while (empty($paymentList) || $pinfo['level'] < 4 || $pinfo['status'] != 1 || !$mMember->isThank()) { // 邀请人不符合条件，则找上级邀请人
+        while (empty($paymentList) || $pinfo['level'] < 4 || $pinfo['status'] != 1 || !$mMember->isThank($pinfo['id'])) { // 邀请人不符合条件，则找上级邀请人
             $pinfo = $mMember->where('id', $pinfo['invite_uid'])->first();
             $pinfo = $this->dbResult($pinfo);
 

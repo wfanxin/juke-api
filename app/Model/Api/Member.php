@@ -19,6 +19,13 @@ class Member extends Model
     public function isThank($user_id) {
         $info = $this->where('id', $user_id)->first();
         $info = $this->dbResult($info);
+        if (empty($info)) {
+            return false;
+        }
+
+        if ($info['system'] == 1) { // 系统会员直接通过
+            return true;
+        }
 
         $mConfig = new Config();
         $award = $mConfig->where('name', 'award')->first();
