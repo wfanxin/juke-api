@@ -71,10 +71,13 @@ class ExpireMemberDeal extends Command
             $this->_log('删除用户' . $data['id']);
             $this->_log($data);
 
-            // 其他节点到左子节点下面
+            // 子节点顶替他的位置
+            $this->mMember->where('id', $child_list[0]['id'])->update(['p_uid' => $data['p_uid']]);
+
             $left_child = $child_list[0]; // 左子节点
             unset($child_list[0]); // 其他节点
 
+            // 其他节点到左子节点下面
             foreach ($child_list as $other) {
                 $p_uid = $this->mMember->getPuid($left_child['id']);
                 $this->mMember->where('id', $other['id'])->update(['p_uid' => $p_uid]);
