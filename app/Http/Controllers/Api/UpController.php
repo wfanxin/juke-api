@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Traits\FormatTrait;
 use App\Model\Api\Config;
 use App\Model\Api\Member;
+use App\Model\Api\Package;
 use App\Model\Api\Payment;
 use App\Model\Api\PayRecord;
 use Illuminate\Http\Request;
@@ -108,8 +109,17 @@ class UpController extends Controller
             'money' => $money
         ];
 
-        $count = $mPayRecord->where('user_id', $data['user_id'])->where('up_level', $data['up_level'])->count();
         $time = date('Y-m-d H:i:s');
+        $package_data = $data;
+        $package_data['pay_uid'] = $mMember->getUpLevelPUid($request->memId, $data['up_level']);
+        if ($package_data['pay_uid'] != $data['pay_uid']) { // 不一致，才算丢包
+            $package_data['created_at'] = $time;
+            $package_data['updated_at'] = $time;
+            $mPackage = new Package();
+            $mPackage->insert($package_data);
+        }
+
+        $count = $mPayRecord->where('user_id', $data['user_id'])->where('up_level', $data['up_level'])->count();
         $res = true;
         if ($count > 0) { // 更新
             $data['status'] = 0; // 审核中

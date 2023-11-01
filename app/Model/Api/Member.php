@@ -94,4 +94,29 @@ class Member extends Model
             $list = $temp_list;
         }
     }
+
+    /**
+     * 获取理论上升级需要打款的上级
+     * @param $user_id
+     * @param $level
+     * @return mixed
+     */
+    public function getUpLevelPUid($user_id, $level) {
+        $p_uid = $user_id;
+        while ($level > 0) {
+            $p_uid = $this->where('id', $p_uid)->value('p_uid');
+            $level--;
+        }
+
+        return $p_uid;
+    }
+
+    /**
+     * 获取理论上感恩人
+     * @param $user_id
+     * @return mixed
+     */
+    public function getThankInviteUid($user_id) {
+        return $this->where('id', $user_id)->value('invite_uid');
+    }
 }

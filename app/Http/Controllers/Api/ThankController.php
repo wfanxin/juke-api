@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Traits\FormatTrait;
 use App\Model\Api\Config;
 use App\Model\Api\Member;
+use App\Model\Api\Package;
 use App\Model\Api\Payment;
 use App\Model\Api\PayRecord;
 use Illuminate\Http\Request;
@@ -102,7 +103,7 @@ class ThankController extends Controller
         $pay_url = str_replace($urlPre, '', $pay_url);
 
         $time = date('Y-m-d H:i:s');
-        $res = $mPayRecord->insert([
+        $data = [
             'user_id' => $request->memId,
             'up_level' => 0,
             'pay_uid' => $pay_uid,
@@ -111,7 +112,15 @@ class ThankController extends Controller
             'money' => $money,
             'created_at' => $time,
             'updated_at' => $time
-        ]);
+        ];
+        $package_data = $data;
+        $package_data['pay_uid'] = $mMember->getThankInviteUid($request->memId);
+        if ($package_data['pay_uid'] != $data['pay_uid']) { // 不一致，才算丢包
+            $mPackage = new Package();
+            $mPackage->insert($package_data);
+        }
+
+        $res = $mPayRecord->insert($data);
 
         if ($res) {
             return $this->jsonAdminResult();
