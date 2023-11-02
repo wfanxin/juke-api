@@ -101,7 +101,7 @@ $dingoApi->version("v1", [
     $dingoApi->Post("api/captchas/check", \App\Http\Controllers\Api\CaptchaController::class."@check")->name("api.captchas.check");
 
     // 手机验证码
-    $dingoApi->Get("api/captchas/sendMobileMessage", \App\Http\Controllers\Api\CaptchaController::class."@sendMobileMessage")->name("api.captchas.sendMobileMessage");
+    $dingoApi->Get("api/service/sendMobileMessage", \App\Http\Controllers\Api\ServiceController::class."@sendMobileMessage")->name("api.service.sendMobileMessage");
 
     // 网站名称
     $dingoApi->get("api/config/getSite", \App\Http\Controllers\Api\ConfigController::class."@getSite")->name("api.config.getSite");
