@@ -20,7 +20,7 @@ class MemberController extends Controller
      * 用户注册
      * @param Request $request
      */
-    public function register(Request $request, Member $mMember)
+    public function register(Request $request, Member $mMember, Redis $redis)
     {
         $params = $request->all();
 
@@ -63,6 +63,13 @@ class MemberController extends Controller
 
         if ($password != $cfpassword) {
             return $this->jsonAdminResult([],10001,'密码和确认密码不一致');
+        }
+
+        $config = config('redisKey');
+        $mobileKey = sprintf($config['mem_code']['key'], $mobile);
+        $verify_code = $redis::get($mobileKey);
+        if ($verify_code != $mobile_code) {
+            return $this->jsonAdminResult([],10001,'验证码错误');
         }
 
         $inviteUserId = $params['inviteUserId'] ?? 0;
@@ -161,16 +168,21 @@ class MemberController extends Controller
      * 忘记密码
      * @param Request $request
      */
-    public function forget(Request $request, Member $mMember)
+    public function forget(Request $request, Member $mMember, Redis $redis)
     {
         $params = $request->all();
 
         $mobile = $params['mobile'] ?? '';
+        $mobile_code = $params['mobile_code'] ?? '';
         $password = $params['password'] ?? '';
         $cfpassword = $params['cfpassword'] ?? '';
 
         if (empty($mobile)) {
             return $this->jsonAdminResult([],10001,'手机号不能为空');
+        }
+
+        if (empty($mobile_code)) {
+            return $this->jsonAdminResult([],10001,'验证码不能为空');
         }
 
         if (empty($password)) {
@@ -183,6 +195,13 @@ class MemberController extends Controller
 
         if ($password != $cfpassword) {
             return $this->jsonAdminResult([],10001,'新密码不一致');
+        }
+
+        $config = config('redisKey');
+        $mobileKey = sprintf($config['mem_code']['key'], $mobile);
+        $verify_code = $redis::get($mobileKey);
+        if ($verify_code != $mobile_code) {
+            return $this->jsonAdminResult([],10001,'验证码错误');
         }
 
         $info = $mMember->where('mobile', $mobile)->first();

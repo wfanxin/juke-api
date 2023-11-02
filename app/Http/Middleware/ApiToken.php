@@ -49,6 +49,13 @@ class ApiToken
             ]);
         }
 
+        if ($info['status'] == 3) { // 拉黑
+            return response()->json([
+                'code' => 20001,
+                'message' => '请重新登录'
+            ]);
+        }
+
         return $next($request);
     }
 }

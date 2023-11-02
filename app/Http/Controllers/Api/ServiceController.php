@@ -75,15 +75,15 @@ class ServiceController extends Controller
         $result = file_get_contents($sendurl);
 
         if ($result == 0) { // 短信发送成功
-            return $this->jsonAdminResult();
-        } else {
             $config = config('redisKey');
             $mobileKey = sprintf($config['mem_code']['key'], $mobile);
 
             $redis::set($mobileKey, $code);
             $redis::expire($mobileKey, $config['mem_code']['ttl']);
 
-            return $this->jsonAdminResult([],10001,$statusStr[$result]);
+            return $this->jsonAdminResult();
+        } else {
+            return $this->jsonAdminResult([],10001, $statusStr[$result]);
         }
     }
 }
