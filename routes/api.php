@@ -100,6 +100,9 @@ $dingoApi->version("v1", [
     $dingoApi->Get("api/captchas/{id}", \App\Http\Controllers\Api\CaptchaController::class."@index")->name("api.captchas.index");
     $dingoApi->Post("api/captchas/check", \App\Http\Controllers\Api\CaptchaController::class."@check")->name("api.captchas.check");
 
+    // 手机验证码
+    $dingoApi->Get("api/captchas/sendMobileMessage", \App\Http\Controllers\Api\CaptchaController::class."@sendMobileMessage")->name("api.captchas.sendMobileMessage");
+
     // 网站名称
     $dingoApi->get("api/config/getSite", \App\Http\Controllers\Api\ConfigController::class."@getSite")->name("api.config.getSite");
     // 国学视频

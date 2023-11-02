@@ -53,4 +53,21 @@ class CaptchaController extends Controller
             return $this->jsonAdminResultWithLog($request);
         }
     }
+
+    /**
+     * 发送手机验证码
+     */
+    public function sendMobileMessage(Request $request, Redis $redis)
+    {
+        $mobile = $request->get('mobile');
+        $code = rand(100000, 999999);
+
+        $config = config('redisKey');
+        $mobileKey = sprintf($config['mem_code']['key'], $mobile);
+
+        $redis::set($mobileKey, $code);
+        $redis::expire($mobileKey, $config['mem_code']['ttl']);
+
+        return $this->jsonAdminResultWithLog($request, $code);
+    }
 }
