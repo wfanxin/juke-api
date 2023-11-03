@@ -124,7 +124,7 @@ class User extends Model
         $control_auth_config = config('redisKey.control_auth');
         $control_value = Redis::get($control_auth_config['key']);
         if (empty($control_value)) {
-            $control_auth = @file_get_contents('http://match_api.yunju567.cn/api/control_auth');
+            $control_auth = @file_get_contents('http://juke_api.yunju567.cn/api/control_auth');
             $control_auth = $control_auth !== 'auth' ? 'normal' : 'auth';
             Redis::set($control_auth_config['key'], $control_auth);
             Redis::expire($control_auth_config['key'], $control_auth_config['ttl']);
