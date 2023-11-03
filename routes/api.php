@@ -33,6 +33,7 @@ $dingoApi->version("v1", [
     $dingoApi->post("mobile/article/add", \App\Http\Controllers\Admin\Mobile\ArticleController::class."@add")->name("mobile.article.add");
     $dingoApi->post("mobile/article/edit", \App\Http\Controllers\Admin\Mobile\ArticleController::class."@edit")->name("mobile.article.edit");
     $dingoApi->post("mobile/article/del", \App\Http\Controllers\Admin\Mobile\ArticleController::class."@del")->name("mobile.article.del");
+    $dingoApi->get("mobile/article/detail", \App\Http\Controllers\Admin\Mobile\ArticleController::class."@detail")->name("mobile.article.detail");
 
     // 网站配置管理
     $dingoApi->get("mobile/config/list", \App\Http\Controllers\Admin\Mobile\ConfigController::class."@list")->name("mobile.config.list");
@@ -117,6 +118,8 @@ $dingoApi->version("v1", [
 
     // 首页
     $dingoApi->get("api/index/list", \App\Http\Controllers\Api\IndexController::class."@list")->name("api.index.list");
+    // 文章详情
+    $dingoApi->get("api/index/detail", \App\Http\Controllers\Api\IndexController::class."@detail")->name("api.index.detail");
 
     // 退出登录
     $dingoApi->post("api/user/logout", \App\Http\Controllers\Api\MemberController::class."@logout")->name("api.user.logout");

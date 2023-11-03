@@ -30,12 +30,29 @@ class IndexController extends Controller
             $slide_list[$key]['image'] = $urlPre . $value['image'];
         }
 
-        $article_list = $mArticle->get(['id', 'title', 'image', 'content']);
+        $article_list = $mArticle->get(['id', 'title', 'image']);
         $article_list = $this->dbResult($article_list);
         foreach ($article_list as $key => $value) {
             $article_list[$key]['image'] = $urlPre . $value['image'];
         }
 
         return $this->jsonAdminResult(['slide_list' => $slide_list, 'article_list' => $article_list]);
+    }
+
+    /**
+     * 文章详情
+     * @param Request $request
+     */
+    public function detail(Request $request, Article $mArticle)
+    {
+        $params = $request->all();
+
+        $id = $params['id'] ?? 0;
+        $info = $mArticle->where('id', $id)->first();
+        $info = $this->dbResult($info);
+
+        return $this->jsonAdminResult([
+            'data' => $info
+        ]);
     }
 }

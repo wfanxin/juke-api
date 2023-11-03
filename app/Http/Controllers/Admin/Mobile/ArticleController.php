@@ -49,6 +49,7 @@ class ArticleController extends Controller
             $urlPre = config('filesystems.disks.tmp.url');
             foreach ($data->items() as $k => $v){
                 $data->items()[$k]['image'] = $urlPre . $v->image;
+                unset($data->items()[$k]['content']);
             }
         }
 
@@ -176,5 +177,30 @@ class ArticleController extends Controller
         } else {
             return $this->jsonAdminResult([],10001,'操作失败');
         }
+    }
+
+    /**
+     * @name 说明详情
+     * @Get("/lv/mobile/article/detail")
+     * @Version("v1")
+     * @PermissionWhiteList
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     **/
+    public function detail(Request $request, Article $mArticle)
+    {
+        $params = $request->all();
+        $params['userId'] = $request->userId;
+
+        $id = $params['id'] ?? 0;
+
+        $where = [];
+        $where[] = ['id', '=', $id];
+        $info = $mArticle->where($where)->first();
+        $info = $this->dbResult($info);
+
+        return $this->jsonAdminResult([
+            'data' => $info
+        ]);
     }
 }
