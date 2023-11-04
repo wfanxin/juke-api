@@ -82,8 +82,10 @@ class OurController extends Controller
             $list = $mMember->whereIn('id', $invite_uids)->get();
             $list = $this->dbResult($list);
             $list = array_column($list, 'name', 'id');
+            $level_list = $mMember->getLevelList();
             foreach ($data as $key => $value) {
                 $value['invite_name'] = $list[$value['invite_uid']] ?? '无';
+                $value['level_name'] = $level_list[$value['level']] ?? '';
                 if (!empty($value['avatar'])) {
                     $value['avatar'] = $urlPre . $value['avatar'];
                 }
