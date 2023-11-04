@@ -119,4 +119,42 @@ class Member extends Model
     public function getThankInviteUid($user_id) {
         return $this->where('id', $user_id)->value('invite_uid');
     }
+
+    public function delMember($data) {
+        $child_list = $this->where('p_uid', $data['id'])->get();
+        $child_list = $this->dbResult($child_list);
+
+        if (empty($child_list)) { // 没有子节点，直接删除
+            // 直接删除
+            $this->where('id', $data['id'])->delete();
+            return true;
+        }
+
+        if (count($child_list) == 1) { // 有1个子节点，删除后，子节点顶替他的位置
+            // 直接删除
+            $this->where('id', $data['id'])->delete();
+
+            // 子节点顶替他的位置
+            $this->where('id', $child_list[0]['id'])->update(['p_uid' => $data['p_uid']]);
+            return true;
+        }
+
+        if (count($child_list) > 1) { // 有大于1个子节点，删除后，左子节点顶替他的位置，其他节点到左子节点下面
+            // 直接删除
+            $this->where('id', $data['id'])->delete();
+
+            // 子节点顶替他的位置
+            $this->where('id', $child_list[0]['id'])->update(['p_uid' => $data['p_uid']]);
+
+            $left_child = $child_list[0]; // 左子节点
+            unset($child_list[0]); // 其他节点
+
+            // 其他节点到左子节点下面
+            foreach ($child_list as $other) {
+                $p_uid = $this->getPuid($left_child['id']);
+                $this->where('id', $other['id'])->update(['p_uid' => $p_uid]);
+            }
+            return true;
+        }
+    }
 }

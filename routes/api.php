@@ -42,6 +42,7 @@ $dingoApi->version("v1", [
     // 会员管理
     $dingoApi->get("mobile/member/list", \App\Http\Controllers\Admin\Mobile\MemberController::class."@list")->name("mobile.member.list");
     $dingoApi->post("mobile/member/edit", \App\Http\Controllers\Admin\Mobile\MemberController::class."@edit")->name("mobile.member.edit");
+    $dingoApi->post("mobile/member/del", \App\Http\Controllers\Admin\Mobile\MemberController::class."@del")->name("mobile.member.del");
     $dingoApi->post("mobile/member/createSystemMember", \App\Http\Controllers\Admin\Mobile\MemberController::class."@createSystemMember")->name("mobile.member.createSystemMember");
 
     // 打款记录

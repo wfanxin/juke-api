@@ -129,6 +129,42 @@ class MemberController extends Controller
     }
 
     /**
+     * @name 删除会员
+     * @Post("/lv/mobile/member/del")
+     * @Version("v1")
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     **/
+    public function del(Request $request, Member $mMember)
+    {
+        $params = $request->all();
+
+        $id = $params['id'] ?? 0;
+
+        if (empty($id)) {
+            return $this->jsonAdminResult([],10001,'参数错误');
+        }
+
+        $info = $mMember->where('id', $id)->first();
+        $info = $this->dbResult($info);
+        if (empty($info)) {
+            return $this->jsonAdminResult([],10001,'会员不存在');
+        }
+
+        if ($info['system'] == 1) {
+            return $this->jsonAdminResult([],10001,'不能删除系统会员');
+        }
+
+        $res = $mMember->delMember($info);
+
+        if ($res) {
+            return $this->jsonAdminResultWithLog($request);
+        } else {
+            return $this->jsonAdminResult([],10001,'操作失败');
+        }
+    }
+
+    /**
      * @name 生成系统会员
      * @Post("/lv/mobile/member/createSystemMember")
      * @Version("v1")
