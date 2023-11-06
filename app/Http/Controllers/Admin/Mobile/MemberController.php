@@ -85,6 +85,8 @@ class MemberController extends Controller
         $params = $request->all();
 
         $id = $params['id'] ?? 0;
+        $mobile = $params['mobile'] ?? '';
+        $name = $params['name'] ?? '';
         $status = $params['status'] ?? 0;
         $password = $params['password'] ?? '';
         $cfpassword = $params['cfpassword'] ?? '';
@@ -101,10 +103,30 @@ class MemberController extends Controller
             return $this->jsonAdminResult([],10001, '用户信息不存在');
         }
 
+        if (empty($mobile)) {
+            return $this->jsonAdminResult([],10001, '手机号不能为空');
+        }
+
+        $pattern = '/^1[0-9]{10}$/';
+        if (!preg_match($pattern, $mobile)) {
+            return $this->jsonAdminResult([],10001,'手机号格式不正确');
+        }
+
+        $count = $mMember->where('id', '!=' , $id)->where('mobile', $mobile)->count();
+        if ($count > 0) {
+            return $this->jsonAdminResult([],10001, '手机号已存在');
+        }
+
+        if (empty($name)) {
+            return $this->jsonAdminResult([],10001, '姓名不能为空');
+        }
+
         if (empty($status)) {
             return $this->jsonAdminResult([],10001, '状态不能为空');
         }
 
+        $data['mobile'] = $mobile;
+        $data['name'] = $name;
         $data['status'] = $status;
 
         if (!empty($password)) {
