@@ -54,7 +54,7 @@ class OurController extends Controller
         $today_active_num = $mPayRecord->where('status', 1)
             ->where('up_level', 4)
             ->whereIn('user_id', $all_ids)
-            ->where('created_at', '>=', date('Y-m-d H:i:s'))
+            ->where('updated_at', '>=', date('Y-m-d 00:00:00'))
             ->count();
 
         $invite_num = $mMember->where('invite_uid', $request->memId)->count();
