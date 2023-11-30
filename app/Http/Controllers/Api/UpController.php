@@ -177,7 +177,7 @@ class UpController extends Controller
      */
     public function getApplyList(Request $request, Member $mMember, PayRecord $mPayRecord)
     {
-        $list = $mPayRecord->where('pay_uid', $request->memId)->where('up_level', '!=', 0)->get(); // 不等于0为升级
+        $list = $mPayRecord->where('pay_uid', $request->memId)->where('up_level', '!=', 0)->orderBy('status', 'asc')->orderBy('id', 'desc')->get(); // 不等于0为升级
         $list = $this->dbResult($list);
 
         if (!empty($list)) {
