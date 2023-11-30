@@ -506,4 +506,29 @@ class MemberController extends Controller
 
         return $this->jsonAdminResult(['data' => $list, 'money' => $money]);
     }
+
+    /**
+     * 直推列表
+     * @param Request $request
+     */
+    public function getInviteMemberList(Request $request, Member $mMember) {
+        $list = $mMember->where('invite_uid', $request->memId)->orderBy('id', 'desc')->get();
+        $list = $this->dbResult($list);
+
+        if (!empty($list)) {
+            $urlPre = config('filesystems.disks.tmp.url');
+            $level_list = $mMember->getLevelList();
+            foreach ($list as $key => $value) {
+                $value['level_name'] = $level_list[$value['level']] ?? '';
+                if (!empty($value['avatar'])) {
+                    $value['avatar'] = $urlPre . $value['avatar'];
+                }
+                $list[$key] = $value;
+            }
+        }
+
+        return $this->jsonAdminResult([
+            'data' => $list
+        ]);
+    }
 }

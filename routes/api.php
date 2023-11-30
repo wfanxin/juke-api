@@ -140,6 +140,9 @@ $dingoApi->version("v1", [
     // 我的收益
     $dingoApi->get("api/user/getMoneyList", \App\Http\Controllers\Api\MemberController::class."@getMoneyList")->name("api.user.getMoneyList");
 
+    // 直推列表
+    $dingoApi->get("api/user/getInviteMemberList", \App\Http\Controllers\Api\MemberController::class."@getInviteMemberList")->name("api.user.getInviteMemberList");
+
     // 同修层级用户数量
     $dingoApi->get("api/our/getOurLevelNum", \App\Http\Controllers\Api\OurController::class."@getOurLevelNum")->name("api.our.getOurLevelNum");
     // 同修小组列表

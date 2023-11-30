@@ -57,11 +57,14 @@ class OurController extends Controller
             ->where('created_at', '>=', date('Y-m-d H:i:s'))
             ->count();
 
+        $invite_num = $mMember->where('invite_uid', $request->memId)->count();
+
         return $this->jsonAdminResult([
             'data' => $data,
             'total_num' => $total_num,
             'active_num' => $active_num,
-            'today_active_num' => $today_active_num
+            'today_active_num' => $today_active_num,
+            'invite_num' => $invite_num
         ]);
     }
 
