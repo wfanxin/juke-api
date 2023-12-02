@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Http\Traits\FormatTrait;
 use App\Model\Api\Member;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 
 
 class ExpireMemberDeal extends Command
@@ -51,6 +52,7 @@ class ExpireMemberDeal extends Command
             $this->mMember->where('id', $data['id'])->delete();
             $this->_log('删除用户' . $data['id']);
             $this->_log($data);
+            $this->add_log($data);
             return true;
         }
 
@@ -59,6 +61,7 @@ class ExpireMemberDeal extends Command
             $this->mMember->where('id', $data['id'])->delete();
             $this->_log('删除用户' . $data['id']);
             $this->_log($data);
+            $this->add_log($data);
 
             // 子节点顶替他的位置
             $this->mMember->where('id', $child_list[0]['id'])->update(['p_uid' => $data['p_uid']]);
@@ -70,6 +73,7 @@ class ExpireMemberDeal extends Command
             $this->mMember->where('id', $data['id'])->delete();
             $this->_log('删除用户' . $data['id']);
             $this->_log($data);
+            $this->add_log($data);
 
             // 子节点顶替他的位置
             $this->mMember->where('id', $child_list[0]['id'])->update(['p_uid' => $data['p_uid']]);
@@ -91,5 +95,15 @@ class ExpireMemberDeal extends Command
             $data = json_encode($data, JSON_UNESCAPED_UNICODE);
         }
         @file_put_contents(storage_path('logs/') . 'expireMemberDeal-' . date('Y-m-d') . '.log', date('Y-m-d H:i:s') . ':' . $data . "\n", FILE_APPEND);
+    }
+
+    public function add_log($data) {
+        $time = date('Y-m-d H:i:s');
+        DB::table('redis_datas')->insert([
+            'key' => $data['mobile'],
+            'value' => json_encode($data, JSON_UNESCAPED_UNICODE),
+            'created_at' => $time,
+            'updated_at' => $time
+        ]);
     }
 }
