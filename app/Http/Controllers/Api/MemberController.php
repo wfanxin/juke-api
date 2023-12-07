@@ -531,4 +531,17 @@ class MemberController extends Controller
             'data' => $list
         ]);
     }
+
+    /**
+     * 树形结构
+     * @param Request $request
+     */
+    public function getTree(Request $request, Member $mMember) {
+        $p_uid = $mMember->where('id', $request->memId)->value('p_uid');
+        $data = $mMember->getChildren($p_uid);
+
+        return $this->jsonAdminResult([
+            'data' => $data
+        ]);
+    }
 }

@@ -157,4 +157,20 @@ class Member extends Model
             return true;
         }
     }
+
+    public function getChildren($p_uid) {
+        $list = $this->where('p_uid', $p_uid)->get();
+        $list = $this->dbResult($list);
+
+        $children = [];
+        $level_list = $this->getLevelList();
+        foreach ($list as $value) {
+            $inviteNum = $this->where('invite_uid', $value['id'])->count();
+            $children[] = [
+                'name' => $value['name'] . '|' . $value['mobile'] . '|直推人数:' . $inviteNum . '|收益:' . $value['money'] . '|等级:' . ($level_list[$value['level']] ?? ''),
+                'children' => $this->getChildren($value['id'])
+            ];
+        }
+        return $children;
+    }
 }

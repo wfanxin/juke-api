@@ -143,6 +143,9 @@ $dingoApi->version("v1", [
     // 直推列表
     $dingoApi->get("api/user/getInviteMemberList", \App\Http\Controllers\Api\MemberController::class."@getInviteMemberList")->name("api.user.getInviteMemberList");
 
+    // 树形结构
+    $dingoApi->get("api/user/getTree", \App\Http\Controllers\Api\MemberController::class."@getTree")->name("api.user.getTree");
+
     // 同修层级用户数量
     $dingoApi->get("api/our/getOurLevelNum", \App\Http\Controllers\Api\OurController::class."@getOurLevelNum")->name("api.our.getOurLevelNum");
     // 同修小组列表
