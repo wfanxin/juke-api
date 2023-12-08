@@ -191,9 +191,9 @@ class Member extends Model
             $deep++;
 
             // 节点颜色
-            $itemStyle = ['color' => '#000000', 'borderColor' => '#000000'];
+            $itemStyle = ['color' => '#1e9fff', 'borderColor' => '#1e9fff'];
             if ($value['invite_uid'] == $invite_uid) {
-                $itemStyle = ['color' => '#c92b3b', 'borderColor' => '#c92b3b'];
+                $itemStyle = ['color' => '#e96161', 'borderColor' => '#e96161'];
             }
 
             $children[] = [
