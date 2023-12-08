@@ -44,6 +44,7 @@ $dingoApi->version("v1", [
     $dingoApi->post("mobile/member/edit", \App\Http\Controllers\Admin\Mobile\MemberController::class."@edit")->name("mobile.member.edit");
     $dingoApi->post("mobile/member/del", \App\Http\Controllers\Admin\Mobile\MemberController::class."@del")->name("mobile.member.del");
     $dingoApi->post("mobile/member/createSystemMember", \App\Http\Controllers\Admin\Mobile\MemberController::class."@createSystemMember")->name("mobile.member.createSystemMember");
+    $dingoApi->get("mobile/member/getTree", \App\Http\Controllers\Admin\Mobile\MemberController::class."@getTree")->name("mobile.member.getTree");
 
     // 打款记录
     $dingoApi->get("mobile/payRecord/list", \App\Http\Controllers\Admin\Mobile\PayRecordController::class."@list")->name("mobile.payRecord.list");

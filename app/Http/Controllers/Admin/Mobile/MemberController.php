@@ -280,4 +280,25 @@ class MemberController extends Controller
 
         return $this->jsonAdminResult();
     }
+
+    /**
+     * @name 树形结构
+     * @Get("/lv/mobile/member/getTree")
+     * @Version("v1")
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     **/
+    public function getTree(Request $request, Member $mMember) {
+        $params = $request->all();
+        if (empty($params['id'])) {
+            return $this->jsonAdminResult([],10001, '参数错误');
+        }
+
+        $p_uid = $mMember->where('id', $params['id'])->value('p_uid');
+        $data = $mMember->getChildren($p_uid, $params['id'], true, 20);
+
+        return $this->jsonAdminResult([
+            'data' => $data
+        ]);
+    }
 }

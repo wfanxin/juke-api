@@ -538,7 +538,7 @@ class MemberController extends Controller
      */
     public function getTree(Request $request, Member $mMember) {
         $p_uid = $mMember->where('id', $request->memId)->value('p_uid');
-        $data = $mMember->getChildren($p_uid);
+        $data = $mMember->getChildren($p_uid, $request->memId, true,20);
 
         return $this->jsonAdminResult([
             'data' => $data

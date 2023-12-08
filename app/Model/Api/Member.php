@@ -158,17 +158,50 @@ class Member extends Model
         }
     }
 
-    public function getChildren($p_uid) {
-        $list = $this->where('p_uid', $p_uid)->get();
+    public function getChildren($p_uid, $invite_uid, $root, $level) {
+        if ($level < 0) {
+            return [];
+        }
+
+        $list = [];
+        if ($root) { // 跟节点
+            $list = $this->where('p_uid', $p_uid)->where('id', $invite_uid)->get();
+        } else {
+            $list = $this->where('p_uid', $p_uid)->get();
+        }
         $list = $this->dbResult($list);
 
         $children = [];
         $level_list = $this->getLevelList();
         foreach ($list as $value) {
             $inviteNum = $this->where('invite_uid', $value['id'])->count();
+            $childList = $this->getChildren($value['id'], $invite_uid, false, --$level);
+
+            // 层级计算和宽度计算
+            $deep = 0;
+            $widthNum = 0;
+            if (!empty($childList)) {
+                foreach ($childList as $child) {
+                    $deep = $child['deep'] > $deep ? $child['deep'] : $deep;
+                    $widthNum += $child['widthNum'];
+                }
+            } else {
+                $widthNum = 1;
+            }
+            $deep++;
+
+            // 节点颜色
+            $itemStyle = ['color' => '#000000', 'borderColor' => '#000000'];
+            if ($value['invite_uid'] == $invite_uid) {
+                $itemStyle = ['color' => '#c92b3b', 'borderColor' => '#c92b3b'];
+            }
+
             $children[] = [
                 'name' => $value['name'] . '|' . $value['mobile'] . '|直推人数:' . $inviteNum . '|收益:' . $value['money'] . '|等级:' . ($level_list[$value['level']] ?? ''),
-                'children' => $this->getChildren($value['id'])
+                'deep' => $deep,
+                'widthNum' => $widthNum,
+                'itemStyle' => $itemStyle,
+                'children' => $childList
             ];
         }
         return $children;
